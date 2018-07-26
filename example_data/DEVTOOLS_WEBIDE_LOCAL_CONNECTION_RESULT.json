@@ -1,0 +1,1 @@
+{"buckets": [0, 1, 2], "data": [{"date": "20180501", "count": 1, "sum": 1, "histogram": [0, 1, 0], "label": ""}], "kind": "boolean", "description": "Did WebIDE local runtime connection succeed?"}

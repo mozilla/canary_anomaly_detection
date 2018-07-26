@@ -4,6 +4,8 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 from scipy.stats import truncexpon
+from matplotlib import pyplot as plt
+import seaborn as sns
 
 
 def process_file(filename):
@@ -32,7 +34,6 @@ def dict_to_df(data_dict):
         df = pd.DataFrame(data, index=buckets)[sorted(list(data.keys()))]
         df = df.sort_index(ascending=False)
     except ValueError:
-        print('bad buckets!!!')
         length = max([len(d) for d in data.values()])
         df = pd.DataFrame(data, index=list(range(length)))[sorted(list(data.keys()))]
         df = df.sort_index(ascending=False)
@@ -65,7 +66,7 @@ def to_points(bucket_dict, n_points=10000):
                     high = buckets[i + 1]
                 points += truncexpon.rvs(high, size=int(round(dens*n_points, 0)),
                                          loc=low).tolist()
-            points_dict['data'][date] = points
+            points_dict['data'][date] = list(points)
     else:
         for date, hist in bucket_dict['data'].items():
             points = []
@@ -80,7 +81,7 @@ def to_points(bucket_dict, n_points=10000):
                     high = buckets[i + 1]
                 points += np.random.uniform(high=high, low=low,
                                             size=int(round(dens*n_points, 0))).tolist()
-            points_dict['data'][date] = points
+            points_dict['data'][date] = list(points)
     return points_dict
 
 
@@ -94,7 +95,7 @@ def rec_bucket_add(point, i, bucket_data, buckets):
             return bucket_data, i
         else:
             return rec_bucket_add(point, i + 1, bucket_data, buckets)
-    except IndexError:
+    except (IndexError, RecursionError):
         print(i, len(buckets))
 
 
@@ -109,5 +110,32 @@ def to_buckets(point_dict):
             i = 0
             for point in sorted(points):
                 bucket_data, i = rec_bucket_add(point, i, bucket_data, buckets)
-            bucket_dict['data'][date] = np.array(bucket_data)/sum(bucket_data)
+
+            bucket_dict['data'][date] = list(np.array(bucket_data)/sum(bucket_data))
     return bucket_dict
+
+
+def plot(X_true, y_true, X_changed, y_changed, name):
+    a4_dims = (15, 6)
+    plt.subplots(figsize=a4_dims)
+    df = dict_to_df(X_true)
+    y_df = y_dict_to_df(y_true)
+    sns.heatmap(df, cmap="YlGnBu")
+    sns.heatmap(df, mask=1-y_df[0], cmap='YlOrRd')
+    plt.xlabel('Date')
+    plt.ylabel('Bucket')
+    plt.title('NOT CHANGED')
+    plt.savefig(name + '_NOT_CHANGED.png')
+    plt.close()
+
+    a4_dims = (15, 6)
+    plt.subplots(figsize=a4_dims)
+    df = dict_to_df(X_changed)
+    y_df = y_dict_to_df(y_changed)
+    sns.heatmap(df, cmap="YlGnBu")
+    sns.heatmap(df, mask=1-y_df[0], cmap='YlOrRd')
+    plt.xlabel('Date')
+    plt.ylabel('Bucket')
+    plt.title('CHANGED')
+    plt.savefig(name + '_CHANGED.png')
+    plt.close()

@@ -1,0 +1,1 @@
+{"buckets": [0, 1, 2], "data": [{"date": "20180404", "count": 1, "sum": 1, "histogram": [0, 1, 0], "label": ""}], "kind": "boolean", "description": "A number of changes of detected language before (true) or after (false) translating a page for the first time."}

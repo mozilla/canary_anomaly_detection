@@ -1,0 +1,1 @@
+{"buckets": ["KeyShortcut", "SystemMenu", "HamburgerMenu", "ContextMenu", "CommandLine", "spill"], "data": [{"date": "20180315", "count": 1, "sum": 0, "histogram": [1, 0, 0, 0, 0, 0], "label": ""}], "kind": "categorical", "description": "Records the reason for opening the about:devtools page."}

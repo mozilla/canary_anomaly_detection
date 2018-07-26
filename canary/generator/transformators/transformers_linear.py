@@ -29,7 +29,7 @@ class AddMoveTransformer(TransformerLinear):
         y_copy = deepcopy(y)
         points = point_dict['data'][self.change_date]
         points = abs(np.array(points) + self.shift)
-        point_dict['data'][self.change_date] = points
+        point_dict['data'][self.change_date] = list(points)
         if y is not None:
             y_copy[self.change_date] = 1
             return point_dict, y_copy
@@ -65,7 +65,7 @@ class AddToSomeBucketSmoothTransformer(TransformerLinear):
         scale = self.mean / shape
         points = [np.random.gamma(shape, scale) if
                   np.random.binomial(1, self.percentage) else p for p in points]
-        point_dict['data'][self.change_date] = points
+        point_dict['data'][self.change_date] = list(points)
         if y is not None:
             y_copy[self.change_date] = 1
             return point_dict, y_copy
@@ -95,7 +95,7 @@ class AddAnotherDistTransformer(TransformerLinear):
         scale = self.mean / shape
         points = point_dict['data'][self.change_date]
         points = np.random.gamma(shape, scale, len(points))
-        point_dict['data'][self.change_date] = points
+        point_dict['data'][self.change_date] = list(points)
         if y is not None:
             y_copy[self.change_date] = 1
             return point_dict, y_copy
@@ -115,7 +115,7 @@ class AddGaussianNoiseTransformer(TransformerLinear):
         for date, points in point_dict['data'].items():
             noise = np.random.normal(0, self.std, len(points))
             points = np.array(points) + noise
-            point_dict['data'][date] = points
+            point_dict['data'][date] = list(points)
         if y is not None:
             return point_dict, y
         return point_dict
@@ -134,7 +134,7 @@ class AddTrendTransformer(TransformerLinear):
         for i, (date, points) in enumerate(sorted(point_dict['data'].items())):
             trend = i * self.alpha
             points = np.array(points) + trend
-            point_dict['data'][date] = points
+            point_dict['data'][date] = list(points)
         if y is not None:
             return point_dict, y
         return point_dict
@@ -156,7 +156,7 @@ class AddWeekSeasonalityTransformer(TransformerLinear):
         for i, (date, points) in enumerate(sorted(point_dict['data'].items())):
             week_season = (week[i % 7]) * self.alpha
             points = np.array(points) + week_season
-            point_dict['data'][date] = points
+            point_dict['data'][date] = list(points)
         if y is not None:
             return point_dict, y
         return point_dict

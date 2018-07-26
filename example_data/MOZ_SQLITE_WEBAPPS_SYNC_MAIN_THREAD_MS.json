@@ -1,0 +1,1 @@
+{"buckets": [0, 1, 3, 8, 21, 57, 154, 414, 1114, 3000], "data": [{"date": "20180317", "count": 1, "sum": 3, "histogram": [0, 0, 1, 0, 0, 0, 0, 0, 0, 0], "label": ""}, {"date": "20180312", "count": 1, "sum": 4, "histogram": [0, 0, 1, 0, 0, 0, 0, 0, 0, 0], "label": ""}], "kind": "exponential", "description": "Time spent on SQLite fsync() (ms)"}
