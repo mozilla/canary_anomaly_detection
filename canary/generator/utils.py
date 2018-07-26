@@ -50,12 +50,11 @@ def to_points(bucket_dict, n_points=10000):
     points_dict['buckets'] = buckets
     points_dict['kind'] = bucket_dict['kind']
     points_dict['data'] = {}
-    print(bucket_dict['kind'])
     if bucket_dict['kind'] == 'categorical':
         points_dict['buckets_str'] = buckets
         points_dict['buckets'] = list(range(len(buckets)))
         buckets = points_dict['buckets']
-    if bucket_dict['kind'] in ['exponential', 'categorical', 'enumerated', 'count', 'linear', 'boolean']:
+    if bucket_dict['kind'] in ['exponential', 'count']:
         for date, hist in bucket_dict['data'].items():
             points = []
             for i, dens in enumerate(hist):
@@ -64,10 +63,24 @@ def to_points(bucket_dict, n_points=10000):
                     high = low + (buckets[i] - buckets[i - 1])
                 else:
                     high = buckets[i + 1]
-                points += truncexpon.rvs(high, size=int(round(dens*n_points, 0)), loc=low).tolist()
+                points += truncexpon.rvs(high, size=int(round(dens*n_points, 0)),
+                                         loc=low).tolist()
             points_dict['data'][date] = points
     else:
-        print(bucket_dict['kind'])
+        for date, hist in bucket_dict['data'].items():
+            points = []
+            if len(hist) != len(buckets):
+                buckets = list(range(len(hist)))
+                points_dict['buckets'] = buckets
+            for i, dens in enumerate(hist):
+                low = buckets[i]
+                if i + 1 == len(buckets):
+                    high = low + (buckets[i] - buckets[i - 1])
+                else:
+                    high = buckets[i + 1]
+                points += np.random.uniform(high=high, low=low,
+                                            size=int(round(dens*n_points, 0))).tolist()
+            points_dict['data'][date] = points
     return points_dict
 
 
@@ -92,13 +105,9 @@ def to_buckets(point_dict):
     bucket_dict['kind'] = point_dict['kind']
     bucket_dict['data'] = {}
     for date, points in point_dict['data'].items():
-        if point_dict['kind'] in ['exponential', 'categorical', 'enumerated', 'count', 'linear', 'boolean']:
             bucket_data = [0]*len(buckets)
             i = 0
             for point in sorted(points):
                 bucket_data, i = rec_bucket_add(point, i, bucket_data, buckets)
             bucket_dict['data'][date] = np.array(bucket_data)/sum(bucket_data)
-        else:
-            print(bucket_dict['kind'])
-            break
     return bucket_dict

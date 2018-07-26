@@ -10,9 +10,6 @@ class TransformerExponential(Transformer, ABC):
     def __init__(self):
         super(TransformerExponential, self).__init__(['exponential', 'count'])
 
-    # def transform(self, point_dict, y):
-    #     raise NotImplementedError
-
 
 class AddMoveTransformer(TransformerExponential):
     def __init__(self, shift=None, change_date=None):

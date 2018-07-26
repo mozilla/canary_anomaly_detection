@@ -111,7 +111,7 @@ class AddGaussianNoiseTransformer(TransformerLinear):
 
     def transform(self, point_dict, y):
         if not self.is_std:
-            self.std = np.random.uniform(0, 0.2) * max(point_dict['buckets'])
+            self.std = np.random.uniform(0, 0.01) * max(point_dict['buckets'])
         for date, points in point_dict['data'].items():
             noise = np.random.normal(0, self.std, len(points))
             points = np.array(points) + noise
@@ -149,7 +149,7 @@ class AddWeekSeasonalityTransformer(TransformerLinear):
 
     def transform(self, point_dict, y):
         if not self.is_alpha:
-            self.alpha = np.random.uniform(0, 0.1)
+            self.alpha = np.random.uniform(0, 0.01)
         week = []
         for i in range(7):
             week.append(np.random.uniform(-1, 1) * max(point_dict['buckets']))
