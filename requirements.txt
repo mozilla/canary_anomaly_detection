@@ -4,3 +4,4 @@ setuptools
 scipy
 matplotlib
 seaborn
+requests
