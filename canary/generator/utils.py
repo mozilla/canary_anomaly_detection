@@ -1,5 +1,6 @@
 import json
 from collections import defaultdict
+from glob import glob
 
 import numpy as np
 import pandas as pd
@@ -64,8 +65,8 @@ def to_points(bucket_dict, n_points=10000):
                     high = low + (buckets[i] - buckets[i - 1])
                 else:
                     high = buckets[i + 1]
-                points += truncexpon.rvs(high, size=int(round(dens*n_points, 0)),
-                                         loc=low).tolist()
+                points += truncexpon.rvs(
+                    high, size=max(int(round(dens*n_points, 0)), 0), loc=low).tolist()
             points_dict['data'][date] = list(points)
     else:
         for date, hist in bucket_dict['data'].items():
@@ -139,3 +140,20 @@ def plot(X_true, y_true, X_changed, y_changed, name):
     plt.title('CHANGED')
     plt.savefig(name + '_CHANGED.png')
     plt.close()
+
+
+def make_X_y(directory_for_glob):
+    hists = {}
+    for f in sorted(glob(directory_for_glob)):
+        name = f.split('/')[-1]
+        try:
+            if name not in hists.keys():
+                hists[name] = process_file(f)
+            hists[name]['data'] = {**hists[name]['data'], **process_file(f)['data']}
+        except KeyError:
+            print(f)
+
+    y = {}
+    for metric, hist in hists.items():
+        y[metric] = dict.fromkeys(hist['data'], 0)
+    return hists, y

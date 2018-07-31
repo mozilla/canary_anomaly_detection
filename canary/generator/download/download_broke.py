@@ -20,6 +20,7 @@ def get_data(arglist):
     try:
         data = json.loads(data)
     except JSONDecodeError:
+        print('bad matric: ', m)
         return
     data['channel'] = ch
     data['metric'] = m

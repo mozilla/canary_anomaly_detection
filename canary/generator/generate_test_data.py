@@ -4,7 +4,7 @@ import os
 import sys
 import json
 
-from canary.generator.utils import process_file, to_points, to_buckets, plot
+from canary.generator.utils import to_points, to_buckets, plot, make_X_y
 from canary.generator.pipelines_categorical import anomaly_categorical_pipeline, \
     not_anomaly_categorical_pipeline
 from canary.generator.pipelines_exponential import anomaly_exponential_pipeline, \
@@ -32,19 +32,8 @@ def change_array_list(X):
 
 
 if __name__ == '__main__':
-    hists = {}
-    for f in sorted(glob(sys.argv[1])):
-        name = f.split('/')[-1]
-        try:
-            if name not in hists.keys():
-                hists[name] = process_file(f)
-            hists[name]['data'] = {**hists[name]['data'], **process_file(f)['data']}
-        except KeyError:
-            print(f)
 
-    y = {}
-    for metric, hist in hists.items():
-        y[metric] = dict.fromkeys(hist['data'], 0)
+    hists, y = make_X_y(sys.argv[1])
 
     for column in hists.keys():
         new_hist = deepcopy(hists[column])
@@ -81,8 +70,8 @@ if __name__ == '__main__':
         directory_data_y_train = os.path.join(sys.argv[2], col_name + '_y_train.json')
         directory_data_y_test = os.path.join(sys.argv[2], col_name + '_y_test.json')
         directory_plot = os.path.join(sys.argv[2], col_name)
-        new_hist['data'] = {**new_hist_train['data'], **new_hist_test['data']}
-        new_y = {**new_y_train, **new_y_test}
+        # new_hist['data'] = {**new_hist_train['data'], **new_hist_test['data']}
+        # new_y = {**new_y_train, **new_y_test}
 
         json.dump(new_hist_train, open(directory_data_X_train, 'w'))
         json.dump(new_hist_test, open(directory_data_X_test, 'w'))

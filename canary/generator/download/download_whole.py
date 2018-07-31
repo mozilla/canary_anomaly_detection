@@ -28,7 +28,11 @@ if __name__ == '__main__':
             try:
                 data = json.loads(data)
             except JSONDecodeError:
-                print(m)
+                print('bad matric: ', m)
                 continue
+            try:
+                os.makedirs(os.path.join(sys.argv[1], 'nightly_' + v + '_whole/'))
+            except OSError:
+                pass
             json.dump(data, open(
-                os.path.join(sys.argv[1], 'nightly_' + v + '_whole/' + m + '.json'), 'w'))
+                os.path.join(sys.argv[1], 'nightly_' + v + '_whole/',  m + '.json'), 'w'))
