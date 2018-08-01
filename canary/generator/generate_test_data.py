@@ -1,4 +1,3 @@
-from glob import glob
 from copy import deepcopy
 import os
 import sys
@@ -78,4 +77,5 @@ if __name__ == '__main__':
         json.dump(new_y_train, open(directory_data_y_train, 'w'))
         json.dump(new_y_test, open(directory_data_y_test, 'w'))
 
-        plot(hists[column], y[column], new_hist, new_y, name=directory_plot)
+        if bool(sys.argv[3]):
+            plot(hists[column], y[column], new_hist, new_y, name=directory_plot)
