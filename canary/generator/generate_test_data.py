@@ -31,7 +31,6 @@ def change_array_list(X):
 
 
 if __name__ == '__main__':
-
     hists, y = make_X_y(sys.argv[1])
 
     for column in hists.keys():
