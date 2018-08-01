@@ -1,5 +1,5 @@
-def query(dates, metric, channel, version, os=None, os_version=None,
-          application=None, architecture=None):
+def build_query_string(dates, metric, channel, version, os=None, os_version=None,
+                       application=None, architecture=None):
     query_base = 'https://aggregates.telemetry.mozilla.org/aggregates_by/build_id/channels/'
     date_str = '%2C'.join(dates)
     os = '&os=' + os if os else ''

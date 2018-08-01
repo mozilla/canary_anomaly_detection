@@ -1,20 +1,28 @@
 # Canary Anomaly Detection
 
+## Installation
+
+You should just install the requirements:
+```bash
+pip install -e .
+```
+
 ## Generator
 
 The generator module is use to generate the test data, i.e. data with synthetic anomalies. 
 The Data flow:
 1. Download the data with `download_whole.py`, eg:
     ```bash
-    python download_whole.py /some/directory
+    python canary/generator/download/download_whole.py /some/directory 5
     ``` 
-    The script makes 5 catalogs in `/some/directory`  with the data from 5 latest versions of nightly.
+    The script makes catalogs in `/some/directory` (first argument)  with the data from 5 (second argument) 
+    latest versions of nightly. The data is downloaded from telemetry [HTTP API](https://github.com/mozilla/python_mozaggregator#api)
 2. Generate the data with anomalies with `generate_test_data.py`, eg:
     ```bash
     python canary/generator/generate_test_data.py 'example_data/*.json' /some/directory
     ```
     The first argument is the directory with downloaded data and it's going to `glob` function, so any
-    regular expressions are accepted. In the example `example_data` from the module is used.
+    regular expressions are accepted. In the example `example_data` from the module is used. The second argument
     
     What's actually happening to the data inside:
     * The data is preprocessed and split into train and test set. The `y` is generated on the assumption, 
