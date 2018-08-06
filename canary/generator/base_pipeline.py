@@ -1,4 +1,4 @@
-class DataTransformPipeline():
+class DataTransformPipeline:
     def __init__(self, tansformers, kinds):
         self.transformers = tansformers
         self.kinds = kinds

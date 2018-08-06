@@ -14,4 +14,3 @@ def build_query_string(dates, metric, channel, version, os=None, os_version=None
     if architecture:
         query += '&architecture=' + architecture
     return query
-

@@ -3,12 +3,21 @@ import json
 from json import JSONDecodeError
 import sys
 import os
+from argparse import ArgumentParser
 
 import requests
 
 from canary.generator.download.query import build_query_string
 
 if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser.add_argument(dest='dir',
+                        help='Directory, where generated data should be saved')
+    parser.add_argument('-n', '--nightly_version_number', dest='n_versions',
+                        help='Number of versions of nightly to download the data from',
+                        default=5)
+    args = parser.parse_args()
+    import ipdb; ipdb.set_trace()
     dates_versions_response = requests.get(
         'https://aggregates.telemetry.mozilla.org/aggregates_by/build_id/channels/nightly/dates/').text
     dates_versions = json.loads(dates_versions_response)
@@ -18,14 +27,14 @@ if __name__ == '__main__':
         dates_for_versions[item['version']].append(item['date'])
     versions = sorted(list(dates_for_versions.keys()))
 
-    for version in versions[-int(sys.argv[2]):]:
+    for version in versions[-int(args.n_versions):]:
         # Download options for a version
         options_response = requests.get(
             'https://aggregates.telemetry.mozilla.org/filters/?channel=nightly&version=' + version).text
         options = json.loads(options_response)
         # Make directories for a version
         try:
-            os.makedirs(os.path.join(sys.argv[1], 'nightly_' + version + '_whole/'))
+            os.makedirs(os.path.join(args.dir, 'nightly_' + version + '_whole/'))
         except OSError:
             pass
 
@@ -42,5 +51,5 @@ if __name__ == '__main__':
 
             # Store data on disc
             json.dump(data, open(
-                os.path.join(sys.argv[1],
+                os.path.join(args.dir,
                              'nightly_' + version + '_whole/', metric + '.json'), 'w'))

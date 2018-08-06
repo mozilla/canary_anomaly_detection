@@ -1,15 +1,21 @@
 from copy import deepcopy
 import os
-import sys
 import json
+from argparse import ArgumentParser
 
-from canary.generator.utils import to_points, to_buckets, plot, make_X_y
-from canary.generator.pipelines_categorical import anomaly_categorical_pipeline, \
-    not_anomaly_categorical_pipeline
-from canary.generator.pipelines_exponential import anomaly_exponential_pipeline, \
-    not_anomaly_exponential_pipeline
-from canary.generator.pipelines_linear import anomaly_linear_pipeline, \
-    not_anomaly_linear_pipeline
+from canary.generator.utils import to_points, to_buckets, plot, read_X_y_from_files
+from canary.generator.pipelines_categorical import (
+    anomaly_categorical_pipeline,
+    not_anomaly_categorical_pipeline,
+)
+from canary.generator.pipelines_exponential import (
+    anomaly_exponential_pipeline,
+    not_anomaly_exponential_pipeline,
+)
+from canary.generator.pipelines_linear import (
+    anomaly_linear_pipeline,
+    not_anomaly_linear_pipeline,
+)
 
 
 def train_test_split_data(X, y, rate):
@@ -31,7 +37,15 @@ def change_array_list(X):
 
 
 if __name__ == '__main__':
-    hists, y = make_X_y(sys.argv[1])
+    parser = ArgumentParser()
+    parser.add_argument(dest='files', help='Files with data', nargs='*')
+    parser.add_argument(dest='dir',
+                        help='Directory, where generated data should be saved')
+    parser.add_argument('-p', '--plots', dest='plots', action="store_true",
+                        help='Save the plots of generated anomalies', default=False)
+    args = parser.parse_args()
+
+    hists, y = read_X_y_from_files(args.files)
 
     for column in hists.keys():
         new_hist = deepcopy(hists[column])
@@ -63,18 +77,17 @@ if __name__ == '__main__':
             new_hist_test, new_y_test
         )
         col_name = column.split('.json')[-2]
-        directory_data_X_train = os.path.join(sys.argv[2], col_name + '_X_train.json')
-        directory_data_X_test = os.path.join(sys.argv[2], col_name + '_X_test.json')
-        directory_data_y_train = os.path.join(sys.argv[2], col_name + '_y_train.json')
-        directory_data_y_test = os.path.join(sys.argv[2], col_name + '_y_test.json')
-        directory_plot = os.path.join(sys.argv[2], col_name)
-        # new_hist['data'] = {**new_hist_train['data'], **new_hist_test['data']}
-        # new_y = {**new_y_train, **new_y_test}
+        directory_data_X_train = os.path.join(args.dir, col_name + '_X_train.json')
+        directory_data_X_test = os.path.join(args.dir, col_name + '_X_test.json')
+        directory_data_y_train = os.path.join(args.dir, col_name + '_y_train.json')
+        directory_data_y_test = os.path.join(args.dir, col_name + '_y_test.json')
+        directory_plot = os.path.join(args.dir, col_name)
 
         json.dump(new_hist_train, open(directory_data_X_train, 'w'))
         json.dump(new_hist_test, open(directory_data_X_test, 'w'))
         json.dump(new_y_train, open(directory_data_y_train, 'w'))
         json.dump(new_y_test, open(directory_data_y_test, 'w'))
 
-        if bool(sys.argv[3]):
+        if args.plots:
             plot(hists[column], y[column], new_hist, new_y, name=directory_plot)
+

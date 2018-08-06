@@ -1,6 +1,5 @@
 import json
 from collections import defaultdict
-from glob import glob
 
 import numpy as np
 import pandas as pd
@@ -86,8 +85,9 @@ def to_points(bucket_dict, n_points=10000):
     return points_dict
 
 
-def rec_bucket_add(point, i, bucket_data, buckets):
-    try:
+# TODO: There is still some bug: ValueError: Shape of passed values is (251, 9), indices imply (251, 11)
+def bucket_add(point, i, bucket_data, buckets):
+    while True:
         if i == len(buckets) - 1:
             bucket_data[-1] += 1
             return bucket_data, i
@@ -95,9 +95,7 @@ def rec_bucket_add(point, i, bucket_data, buckets):
             bucket_data[i] += 1
             return bucket_data, i
         else:
-            return rec_bucket_add(point, i + 1, bucket_data, buckets)
-    except (IndexError, RecursionError):
-        print(i, len(buckets))
+            i += 1
 
 
 def to_buckets(point_dict):
@@ -110,8 +108,7 @@ def to_buckets(point_dict):
             bucket_data = [0]*len(buckets)
             i = 0
             for point in sorted(points):
-                bucket_data, i = rec_bucket_add(point, i, bucket_data, buckets)
-
+                bucket_data, i = bucket_add(point, i, bucket_data, buckets)
             bucket_dict['data'][date] = list(np.array(bucket_data)/sum(bucket_data))
     return bucket_dict
 
@@ -119,8 +116,11 @@ def to_buckets(point_dict):
 def plot(X_true, y_true, X_changed, y_changed, name):
     a4_dims = (15, 6)
     plt.subplots(figsize=a4_dims)
-    df = dict_to_df(X_true)
-    y_df = y_dict_to_df(y_true)
+    try:
+        df = dict_to_df(X_true)
+        y_df = y_dict_to_df(y_true)
+    except ValueError:
+        return
     sns.heatmap(df, cmap="YlGnBu")
     sns.heatmap(df, mask=1-y_df[0], cmap='YlOrRd')
     plt.xlabel('Date')
@@ -142,9 +142,38 @@ def plot(X_true, y_true, X_changed, y_changed, name):
     plt.close()
 
 
-def make_X_y(directory_for_glob):
+def read_X_y_from_files(list_of_files):
+    """
+    Reads files from disc and makes the y
+    :param list_of_files: list of files with data
+    :return: two dicts:
+     hists - dict of histograms, where metrics are the keys and the dict of (date: histogram)
+     pairs is the value, eg:
+     {
+         'METRIC': {
+             'buckets': [1, 2, 4, 8],
+             'kind': 'exponential'
+             'data': {
+                 '20180713': [0.4, 0.2, 0.1, 0.3],
+                 '20180714': [0.5, 0.3, 0.0, 0.2],
+             }
+         }
+     }
+     y - dict of indicators if the day is anomalous, where metrics are the keys and the
+     dict of (date: boolean (if the day is anomalous)) pairs is the value, eg:
+     {
+         'METRIC': {
+             'buckets': [1, 2, 4, 8],
+             'kind': 'exponential'
+             'data': {
+                 '20180713': 0,
+                 '20180714': 1,
+             }
+         }
+     }
+    """
     hists = {}
-    for f in sorted(glob(directory_for_glob)):
+    for f in sorted(list_of_files):
         name = f.split('/')[-1]
         try:
             if name not in hists.keys():
