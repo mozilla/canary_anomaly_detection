@@ -22,7 +22,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     import ipdb; ipdb.set_trace()
     dates_versions_response = requests.get(
-        'https://aggregates.telemetry.mozilla.org/aggregates_by/build_id/channels/nightly/dates/').text
+        'https://aggregates.telemetry.mozilla.org/'
+        'aggregates_by/build_id/channels/nightly/dates/').text
     dates_versions = json.loads(dates_versions_response)
     # Dict consisting of pairs version: list of dates
     dates_for_versions = defaultdict(list)
@@ -33,7 +34,8 @@ if __name__ == '__main__':
     for version in versions[-int(args.n_versions):]:
         # Download options for a version
         options_response = requests.get(
-            'https://aggregates.telemetry.mozilla.org/filters/?channel=nightly&version=' + version).text
+            'https://aggregates.telemetry.mozilla.org/'
+            'filters/?channel=nightly&version=' + version).text
         options = json.loads(options_response)
         # Make directories for a version
         try:
@@ -43,7 +45,8 @@ if __name__ == '__main__':
 
         for metric in options['metric']:
             # Download data for metric
-            q = build_query_string(dates_for_versions[version], metric, 'nightly', version)
+            q = build_query_string(dates_for_versions[version],
+                                   metric, 'nightly', version)
             data_response = requests.get(q).text
             data = None
             try:

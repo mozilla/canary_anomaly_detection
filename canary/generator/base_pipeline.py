@@ -2,9 +2,17 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+
 class DataTransformPipeline:
-    def __init__(self, tansformers, kinds):
-        self.transformers = tansformers
+    def __init__(self, transformers, kinds):
+        """
+        Base pipeline class.
+
+        :param transformers: List of transformers to be used. Transformers should have
+        the same kinds as the pipeline.
+        :param kinds: List of kinds of histograms the pipeline should be performed on.
+        """
+        self.transformers = transformers
         self.kinds = kinds
 
     def transform(self, X, y=None):

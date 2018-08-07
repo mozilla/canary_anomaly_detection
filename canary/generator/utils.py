@@ -12,7 +12,21 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 
 
-def process_file(filename):
+def _read_one_file(filename):
+    """
+    Reads one file and parse it to the format provided in docs for
+    `read_X_y_dicts_from_files`. Changes histogram values from count to density.
+    :param filename: Name of the file to be read
+    :return: The dict containing daa for one metric, eg:
+    {
+        'buckets': [1, 2, 4, 8],
+        'kind': 'exponential'
+        'data': {
+            '20180713': [0.4, 0.2, 0.1, 0.3],
+            '20180714': [0.5, 0.3, 0.0, 0.2],
+        }
+    }
+    """
     series = dict()
     series['data'] = {}
     with open(filename) as f:
@@ -23,7 +37,7 @@ def process_file(filename):
         for measure in measures:
             measure_date = measure['date']
             hist_sum = sum(measure['histogram'])
-            values = (np.array(measure['histogram']))/float(hist_sum)
+            values = (np.array(measure['histogram'])) / float(hist_sum)
             if measure_date in series:
                 series['data'][measure_date] += np.array(values)
             else:
@@ -31,25 +45,50 @@ def process_file(filename):
     return series
 
 
-def dict_to_df(data_dict):
-    buckets = data_dict['buckets']
-    data = data_dict['data']
+def X_dict_to_df(X_dict):
+    """
+    Parses X_dict do data frame
+    :param X_dict: X_dict to be parsed
+    :return: Data frame with days as columns and buckets as rows
+    """
+    buckets = X_dict['buckets']
+    data = X_dict['data']
     try:
-        df = pd.DataFrame(data, index=buckets)[sorted(list(data.keys()))]
-        df = df.sort_index(ascending=False)
+        X_df = pd.DataFrame(data, index=buckets)[sorted(list(data.keys()))]
+        X_df = X_df.sort_index(ascending=False)
     except ValueError:
-        length = max([len(d) for d in data.values()])
-        df = pd.DataFrame(data, index=list(range(length)))[sorted(list(data.keys()))]
-        df = df.sort_index(ascending=False)
-    return df
+        length = max([len(hist) for hist in data.values()])
+        data = {day: np.pad(hist, (0, length - len(hist)), 'constant', constant_values=0)
+                for day, hist in data.items()}
+        X_df = pd.DataFrame(data, index=list(range(length)))[sorted(list(data.keys()))]
+        X_df = X_df.sort_index(ascending=False)
+    return X_df
 
 
 def y_dict_to_df(y_dict):
-    df = pd.DataFrame(y_dict, index=[0]).transpose()
-    return df
+    """
+    Parses y_dict to data frame
+    :param y_dict: y_dict to be parsed
+    :return: Data frame with days as columns and one row indicating if
+    the day was anomalous
+    """
+    y_df = pd.DataFrame(y_dict, index=[0]).transpose()
+    return y_df
 
 
-def to_points(bucket_dict, n_points=10000):
+def buckets_to_points(bucket_dict, n_points=10000):
+    """
+    Transforms bucket_dict to point_dict by generating n_points from the distribution,
+    that depends on the kind of histogram. The points correspond to the histogram, so:
+    `bucket_dict` is the same as `points_to_buckets(buckets_to_points(bucket_data))`
+
+    Transforming to points is necessary for some transformations.
+
+    :param bucket_dict: one metric from X_dict in bucket version to be transformed
+    :param n_points: Number of points to be generated. Greater number of points indicates
+    more accurate point distribution and more time that is needed.
+    :return: one metric from X_dict in the point version
+    """
     points_dict = defaultdict(list)
     buckets = bucket_dict['buckets']
     points_dict['buckets'] = buckets
@@ -89,8 +128,15 @@ def to_points(bucket_dict, n_points=10000):
     return points_dict
 
 
-# TODO: There is still some bug: ValueError: Shape of passed values is (251, 9), indices imply (251, 11)
-def bucket_add(point, i, bucket_data, buckets):
+def _bucket_add(point, i, bucket_data, buckets):
+    """
+    Adds the point to corresponding bucket
+    :param point: (int) Data point
+    :param i: Current index
+    :param bucket_data: Data in bucket version (one metric from X_dict)
+    :param buckets: Buckets list for
+    :return: bucket_data with a point added and new index
+    """
     while True:
         if i == len(buckets) - 1:
             bucket_data[-1] += 1
@@ -102,7 +148,14 @@ def bucket_add(point, i, bucket_data, buckets):
             i += 1
 
 
-def to_buckets(point_dict):
+def points_to_buckets(point_dict):
+    """
+    Transforms the data in point version again to bucket version. The points correspond
+    to the histogram, so:`bucket_dict` is the same as
+    `points_to_buckets(buckets_to_points(bucket_data))`
+    :param point_dict: one metric from X_dict in point version to be transformed
+    :return: one metric from X_dict in the bucket version
+    """
     bucket_dict = defaultdict(list)
     buckets = point_dict['buckets']
     bucket_dict['buckets'] = buckets
@@ -112,16 +165,25 @@ def to_buckets(point_dict):
             bucket_data = [0]*len(buckets)
             i = 0
             for point in sorted(points):
-                bucket_data, i = bucket_add(point, i, bucket_data, buckets)
+                bucket_data, i = _bucket_add(point, i, bucket_data, buckets)
             bucket_dict['data'][date] = list(np.array(bucket_data)/sum(bucket_data))
     return bucket_dict
 
 
-def plot(X_true, y_true, X_changed, y_changed, name):
+def plot(X_true, y_true, X_changed, y_changed, filename):
+    """
+    Plots the changes in data. Produces two plots: one of untouched data and one of data
+    with anomalies. The anomalies are coloured with red.
+    :param X_true: Unchanged X_dict in bucket version
+    :param y_true: Unchanged y_dict
+    :param X_changed: X_dict with anomalies in bucket version
+    :param y_changed: y_dict with anomalies
+    :param filename: Directory, where the plot should be saved
+    """
     a4_dims = (15, 6)
     plt.subplots(figsize=a4_dims)
     try:
-        df = dict_to_df(X_true)
+        df = X_dict_to_df(X_true)
         y_df = y_dict_to_df(y_true)
     except ValueError:
         return
@@ -130,29 +192,29 @@ def plot(X_true, y_true, X_changed, y_changed, name):
     plt.xlabel('Date')
     plt.ylabel('Bucket')
     plt.title('NOT CHANGED')
-    plt.savefig(name + '_NOT_CHANGED.png')
+    plt.savefig(filename + '_NOT_CHANGED.png')
     plt.close()
 
     a4_dims = (15, 6)
     plt.subplots(figsize=a4_dims)
-    df = dict_to_df(X_changed)
+    df = X_dict_to_df(X_changed)
     y_df = y_dict_to_df(y_changed)
     sns.heatmap(df, cmap="YlGnBu")
     sns.heatmap(df, mask=1-y_df[0], cmap='YlOrRd')
     plt.xlabel('Date')
     plt.ylabel('Bucket')
     plt.title('CHANGED')
-    plt.savefig(name + '_CHANGED.png')
+    plt.savefig(filename + '_CHANGED.png')
     plt.close()
 
 
-def read_X_y_from_files(list_of_files):
+def read_X_y_dicts_from_files(list_of_files):
     """
     Reads files from disc and makes the y
     :param list_of_files: list of files with data
     :return: two dicts:
-     hists - dict of histograms, where metrics are the keys and the dict of (date: histogram)
-     pairs is the value, eg:
+     hists - dict of histograms, where metrics are the keys and the dict of
+     (date: histogram) pairs is the value, eg:
      {
          'METRIC': {
              'buckets': [1, 2, 4, 8],
@@ -181,8 +243,8 @@ def read_X_y_from_files(list_of_files):
         name = f.split('/')[-1]
         try:
             if name not in hists.keys():
-                hists[name] = process_file(f)
-            hists[name]['data'] = {**hists[name]['data'], **process_file(f)['data']}
+                hists[name] = _read_one_file(f)
+            hists[name]['data'] = {**hists[name]['data'], **_read_one_file(f)['data']}
         except KeyError:
             print(f)
 

@@ -7,9 +7,15 @@ from abc import ABC
 
 class Transformer(ABC):
     def __init__(self, kinds):
+        """
+        Abstract class that checks if the kinds of histograms are correct.
+        :param kinds: Kinds on which the transformer should be evaluated
+        """
         self.kinds = kinds
 
-    def transform(self, X, y):
-        if X['kind'] in self.kinds:
-            raise ValueError
+    def transform(self, X_dict, y_dict):
         raise NotImplementedError
+
+    def check_kind(self, X_dict):
+        if X_dict['kind'] not in self.kinds:
+            raise ValueError('Transformer used in wrong pipeline')

@@ -7,7 +7,7 @@ import os
 import json
 from argparse import ArgumentParser
 
-from canary.generator.utils import to_points, to_buckets, plot, read_X_y_from_files
+from canary.generator.utils import buckets_to_points, points_to_buckets, plot, read_X_y_dicts_from_files
 from canary.generator.pipelines_categorical import (
     anomaly_categorical_pipeline,
     not_anomaly_categorical_pipeline,
@@ -49,7 +49,7 @@ if __name__ == '__main__':
                         help='Save the plots of generated anomalies', default=False)
     args = parser.parse_args()
 
-    hists, y = read_X_y_from_files(args.files)
+    hists, y = read_X_y_dicts_from_files(args.files)
 
     for column in hists.keys():
         new_hist = deepcopy(hists[column])
@@ -60,7 +60,7 @@ if __name__ == '__main__':
         new_hist_train = change_array_list(new_hist_train)
         new_hist_test = change_array_list(new_hist_test)
 
-        new_points_test = to_points(new_hist_test)
+        new_points_test = buckets_to_points(new_hist_test)
         new_points_test, new_y_test = anomaly_exponential_pipeline.transform(
             new_points_test, new_y_test
         )
@@ -73,7 +73,7 @@ if __name__ == '__main__':
         new_points_test, new_y_test = not_anomaly_linear_pipeline.transform(
             new_points_test, new_y_test
         )
-        new_hist_test = to_buckets(new_points_test)
+        new_hist_test = points_to_buckets(new_points_test)
         new_hist_test, new_y_test = anomaly_categorical_pipeline.transform(
             new_hist_test, new_y_test
         )
@@ -93,5 +93,5 @@ if __name__ == '__main__':
         json.dump(new_y_test, open(directory_data_y_test, 'w'))
 
         if args.plots:
-            plot(hists[column], y[column], new_hist, new_y, name=directory_plot)
+            plot(hists[column], y[column], new_hist, new_y, filename=directory_plot)
 
