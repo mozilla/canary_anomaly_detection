@@ -8,7 +8,7 @@ pip install -e .
 ```
 
 ## Generator
-
+# TODO: CHANGE THAT
 The generator module is use to generate the test data, i.e. data with synthetic anomalies. 
 The Data flow:
 1. Download the data with `download_whole.py`, eg:

@@ -1,3 +1,8 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+
 def build_query_string(dates, metric, channel, version, os=None, os_version=None,
                        application=None, architecture=None):
     query_base = 'https://aggregates.telemetry.mozilla.org/aggregates_by/build_id/channels/'
