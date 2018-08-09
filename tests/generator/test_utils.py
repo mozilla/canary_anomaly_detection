@@ -2,8 +2,8 @@ import pandas as pd
 
 from canary.generator.utils import (
     _read_one_file,
-    X_dict_to_df,
-    y_dict_to_df,
+    X_metric_to_df,
+    y_metric_to_df,
     buckets_to_points,
     points_to_buckets,
     read_X_y_dicts_from_files,
@@ -46,7 +46,7 @@ def test_X_dict_to_df_different_length():
         '20180313': [0.5, 0.2, 0.1, 0.05, 0.05, 0.03, 0.02, 0.02, 0.02, 0.01],
     }).sort_index(ascending=False)
 
-    X_df = X_dict_to_df(DATA_DIFF_LEN)
+    X_df = X_metric_to_df(DATA_DIFF_LEN)
 
     assert X_df.equals(X_df_true)
 
@@ -57,7 +57,7 @@ def test_X_dict_to_df_same_length():
         '20180313': [0.5, 0.2, 0.1, 0.05, 0.03, 0.03, 0.05, 0.02, 0.02, 0.00],
     }, index=[0, 1, 3, 9, 26, 74, 212, 608, 1744, 5000]).sort_index(ascending=False)
 
-    X_df = X_dict_to_df(DATA_SAME_LEN)
+    X_df = X_metric_to_df(DATA_SAME_LEN)
 
     assert X_df.equals(X_df_true)
 
@@ -68,7 +68,7 @@ def test_y_dict_to_df():
         '20180313': 0,
     }, index=[0]).transpose()
 
-    y_df = y_dict_to_df(Y)
+    y_df = y_metric_to_df(Y)
 
     assert y_df.equals(y_df_true)
 

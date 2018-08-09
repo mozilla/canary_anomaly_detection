@@ -45,14 +45,22 @@ def _read_one_file(filename):
     return series
 
 
-def X_dict_to_df(X_dict):
+def X_metric_to_df(X_metric):
     """
-    Parses X_dict do data frame
-    :param X_dict: X_dict to be parsed
+    Parses one metric from X_dict do data frame. The metric should look like:
+    {
+        'buckets': [1, 2, 4, 8],
+        'kind': 'exponential'
+        'data': {
+            '20180713': [0.4, 0.2, 0.1, 0.3],
+            '20180714': [0.5, 0.3, 0.0, 0.2],
+        }
+    }
+    :param X_metric: One metric from X_dict to be parsed
     :return: Data frame with days as columns and buckets as rows
     """
-    buckets = X_dict['buckets']
-    data = X_dict['data']
+    buckets = X_metric['buckets']
+    data = X_metric['data']
     try:
         X_df = pd.DataFrame(data, index=buckets)[sorted(list(data.keys()))]
         X_df = X_df.sort_index(ascending=False)
@@ -65,14 +73,18 @@ def X_dict_to_df(X_dict):
     return X_df
 
 
-def y_dict_to_df(y_dict):
+def y_metric_to_df(y_metric):
     """
-    Parses y_dict to data frame
-    :param y_dict: y_dict to be parsed
+    Parses one metric from y_dict do data frame. The metric should look like:
+    {
+        '20180713': 0,
+        '20180714': 1,
+    }
+    :param y_metric: One metric from y_dict to be parsed
     :return: Data frame with days as columns and one row indicating if
     the day was anomalous
     """
-    y_df = pd.DataFrame(y_dict, index=[0]).transpose()
+    y_df = pd.DataFrame(y_metric, index=[0]).transpose()
     return y_df
 
 
@@ -184,8 +196,8 @@ def plot(X_true, y_true, X_changed, y_changed, filename):
     a4_dims = (15, 6)
     plt.subplots(figsize=a4_dims)
     try:
-        df = X_dict_to_df(X_true)
-        y_df = y_dict_to_df(y_true)
+        df = X_metric_to_df(X_true)
+        y_df = y_metric_to_df(y_true)
     except ValueError:
         return
     sns.heatmap(df, cmap="YlGnBu")
@@ -198,8 +210,8 @@ def plot(X_true, y_true, X_changed, y_changed, filename):
 
     a4_dims = (15, 6)
     plt.subplots(figsize=a4_dims)
-    df = X_dict_to_df(X_changed)
-    y_df = y_dict_to_df(y_changed)
+    df = X_metric_to_df(X_changed)
+    y_df = y_metric_to_df(y_changed)
     sns.heatmap(df, cmap="YlGnBu")
     sns.heatmap(df, mask=1-y_df[0], cmap='YlOrRd')
     plt.xlabel('Date')
@@ -226,8 +238,8 @@ def read_X_y_dicts_from_files(list_of_files):
              }
          }
      }
-     y_dict - dict of indicators if the day is anomalous, where metrics are the keys and the
-     dict of (date: boolean (if the day is anomalous)) pairs is the value, eg:
+     y_dict - dict of indicators if the day is anomalous, where metrics are the keys and
+     the dict of (date: boolean (if the day is anomalous)) pairs is the value, eg:
      {
          'METRIC': {
              '20180713': 0,

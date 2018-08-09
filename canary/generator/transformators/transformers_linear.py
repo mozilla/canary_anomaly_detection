@@ -193,7 +193,7 @@ class AddTrendTransformer(TransformerLinear):
 class AddWeekSeasonalityTransformer(TransformerLinear):
     def __init__(self, alpha=None):
         """
-        Adds random weakly seasonality. Alpha can control how bir the changes are.
+        Adds random weakly seasonality. Alpha can control how big the changes are.
         If the value is not provided, the random alpha is chosen.
 
         The change is NOT treated as an anomaly.
