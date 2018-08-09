@@ -42,10 +42,10 @@ class AddToSomeBucketTransformer(TransformerCategorical):
         self.bucket_number = bucket_number
         self.change_date = change_date
 
-    def transform(self, bucket_dict, y):
+    def transform(self, bucket_dict, y_dict):
         self.check_kind(bucket_dict)
         bucket_dict_copy = deepcopy(bucket_dict)
-        y_copy = deepcopy(y)
+        y_copy = deepcopy(y_dict)
         if not self.is_date:
             self.change_date = np.random.choice(list(bucket_dict_copy['data'].keys()))
         hist = bucket_dict_copy['data'][self.change_date]
@@ -83,9 +83,9 @@ class AddAnotherDistTransformer(TransformerCategorical):
         self.std = std
         self.change_date = change_date
 
-    def transform(self, bucket_dict, y):
+    def transform(self, bucket_dict, y_dict):
         self.check_kind(bucket_dict)
-        y_copy = deepcopy(y)
+        y_copy = deepcopy(y_dict)
         if not self.is_date:
             self.change_date = np.random.choice(list(bucket_dict['data'].keys()))
         if not self.is_mean:
@@ -116,7 +116,7 @@ class AddNoiseTransformer(TransformerCategorical):
         self.is_std = False if std is None else True
         self.std = std
 
-    def transform(self, bucket_dict, y):
+    def transform(self, bucket_dict, y_dict):
         self.check_kind(bucket_dict)
         if not self.is_std:
             # The limits were chosen to best imitate actual anomalies
@@ -126,4 +126,4 @@ class AddNoiseTransformer(TransformerCategorical):
             hist += noise
             hist = abs(hist)/sum(abs(hist))
             bucket_dict['data'][date] = list(hist)
-        return bucket_dict, y
+        return bucket_dict, y_dict

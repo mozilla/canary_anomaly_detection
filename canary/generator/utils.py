@@ -211,10 +211,10 @@ def plot(X_true, y_true, X_changed, y_changed, filename):
 
 def read_X_y_dicts_from_files(list_of_files):
     """
-    Reads files from disc and makes the y
+    Reads files from disc and makes the y_dict
     :param list_of_files: list of files with data
     :return: two dicts:
-     hists - dict of histograms, where metrics are the keys and the dict of
+     X_dict - dict of histograms, where metrics are the keys and the dict of
      (date: histogram) pairs is the value, eg:
      {
          'METRIC': {
@@ -226,7 +226,7 @@ def read_X_y_dicts_from_files(list_of_files):
              }
          }
      }
-     y - dict of indicators if the day is anomalous, where metrics are the keys and the
+     y_dict - dict of indicators if the day is anomalous, where metrics are the keys and the
      dict of (date: boolean (if the day is anomalous)) pairs is the value, eg:
      {
          'METRIC': {
@@ -235,17 +235,17 @@ def read_X_y_dicts_from_files(list_of_files):
          }
      }
     """
-    hists = {}
+    X_dict = {}
     for f in sorted(list_of_files):
         name = f.split('/')[-1]
         try:
-            if name not in hists.keys():
-                hists[name] = _read_one_file(f)
-            hists[name]['data'] = {**hists[name]['data'], **_read_one_file(f)['data']}
+            if name not in X_dict.keys():
+                X_dict[name] = _read_one_file(f)
+            X_dict[name]['data'] = {**X_dict[name]['data'], **_read_one_file(f)['data']}
         except KeyError:
             print(f)
 
-    y = {}
-    for metric, hist in hists.items():
-        y[metric] = dict.fromkeys(hist['data'], 0)
-    return hists, y
+    y_dict = {}
+    for metric, hist in X_dict.items():
+        y_dict[metric] = dict.fromkeys(hist['data'], 0)
+    return X_dict, y_dict

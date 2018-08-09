@@ -52,7 +52,7 @@ def test_wrong_kinds_categorical():
         error = ''
 
         try:
-            pipeline.transform(DATA_LINEAR, y=None)
+            pipeline.transform(DATA_LINEAR, y_dict=None)
         except ValueError as e:
             error = str(e)
 
@@ -76,7 +76,7 @@ def test_wrong_kinds_linear():
         error = ''
 
         try:
-            pipeline.transform(DATA_EXP, y=None)
+            pipeline.transform(DATA_EXP, y_dict=None)
         except ValueError as e:
             error = str(e)
 
@@ -100,7 +100,7 @@ def test_wrong_kinds_exp():
         error = ''
         print(transformer)
         try:
-            pipeline.transform(DATA_LINEAR, y=None)
+            pipeline.transform(DATA_LINEAR, y_dict=None)
         except ValueError as e:
             error = str(e)
 
@@ -118,6 +118,6 @@ def test_transform_on_wrong_kind():
             transformer,
         ], kinds=['categorical'])
 
-        transformed_data, y = pipeline.transform(DATA_LINEAR, y=[0, 0])
+        transformed_data, y = pipeline.transform(DATA_LINEAR, y_dict=[0, 0])
 
         assert_two_data_dicts_equal(DATA_LINEAR, transformed_data)

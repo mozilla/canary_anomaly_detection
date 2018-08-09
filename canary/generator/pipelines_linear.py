@@ -26,7 +26,5 @@ anomaly_linear_pipeline = DataTransformPipeline([
 ], kinds=['linear'])
 
 not_anomaly_linear_pipeline = DataTransformPipeline([
-    # AddTrendTransformer(),
-    # AddWeekSeasonalityTransformer(),
     AddGaussianNoiseTransformer(),
 ], kinds=['linear'])

@@ -27,22 +27,22 @@ from canary.generator.pipelines_linear import (
 )
 
 
-def train_test_split_data(X, y, rate):
-    dates = sorted(list(X['data'].keys()))
+def train_test_split_data(X_dict, y_dict, rate):
+    dates = sorted(list(X_dict['data'].keys()))
     train_dates = dates[:int(rate*len(dates))]
     test_dates = dates[int(rate*len(dates)):]
-    X_train = deepcopy(X)
+    X_train = deepcopy(X_dict)
     X_train['data'] = {date: X_train['data'][date] for date in train_dates}
-    X_test = deepcopy(X)
+    X_test = deepcopy(X_dict)
     X_test['data'] = {date: X_test['data'][date] for date in test_dates}
-    y_train = {date: y[date] for date in train_dates}
-    y_test = {date: y[date] for date in test_dates}
+    y_train = {date: y_dict[date] for date in train_dates}
+    y_test = {date: y_dict[date] for date in test_dates}
     return X_train, X_test, y_train, y_test
 
 
-def change_array_list(X):
-    X['data'] = {date: list(X['data'][date]) for date in X['data'].keys()}
-    return X
+def change_array_list(X_dict):
+    X_dict['data'] = {date: list(X_dict['data'][date]) for date in X_dict['data'].keys()}
+    return X_dict
 
 
 if __name__ == '__main__':

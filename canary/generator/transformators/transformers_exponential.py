@@ -36,14 +36,14 @@ class AddMoveTransformer(TransformerExponential):
         self.shift = shift
         self.change_date = change_date
 
-    def transform(self, point_dict, y):
+    def transform(self, point_dict, y_dict):
         self.check_kind(point_dict)
         if not self.is_date:
             self.change_date = np.random.choice(list(point_dict['data'].keys()))
         if not self.is_shift:
             self.shift = np.random.uniform(-0.8, 0.8)
 
-        y_copy = deepcopy(y)
+        y_copy = deepcopy(y_dict)
         points = point_dict['data'][self.change_date]
         points = abs(np.array(points) * (1 + self.shift))
         point_dict['data'][self.change_date] = list(points)
@@ -75,9 +75,9 @@ class AddToSomeBucketSmoothTransformer(TransformerExponential):
         self.std = std
         self.change_date = change_date
 
-    def transform(self, point_dict, y):
+    def transform(self, point_dict, y_dict):
         self.check_kind(point_dict)
-        y_copy = deepcopy(y)
+        y_copy = deepcopy(y_dict)
         if not self.is_date:
             self.change_date = np.random.choice(list(point_dict['data'].keys()))
         points = point_dict['data'][self.change_date]
@@ -119,9 +119,9 @@ class AddAnotherDistTransformer(TransformerExponential):
         self.std = std
         self.change_date = change_date
 
-    def transform(self, point_dict, y):
+    def transform(self, point_dict, y_dict):
         self.check_kind(point_dict)
-        y_copy = deepcopy(y)
+        y_copy = deepcopy(y_dict)
         if not self.is_date:
             self.change_date = np.random.choice(list(point_dict['data'].keys()))
         if not self.is_mean:
@@ -152,7 +152,7 @@ class AddExpNoiseTransformer(TransformerExponential):
         self.is_ratio = False if ratio is None else True
         self.ratio = ratio
 
-    def transform(self, point_dict, y):
+    def transform(self, point_dict, y_dict):
         self.check_kind(point_dict)
         if not self.is_ratio:
             # The limits were chosen so the change won't be too significant
@@ -161,7 +161,7 @@ class AddExpNoiseTransformer(TransformerExponential):
             points = [np.random.exponential(abs(p)) if
                       np.random.binomial(1, self.ratio) else p for p in points]
             point_dict['data'][date] = list(points)
-        return point_dict, y
+        return point_dict, y_dict
 
 
 class AddTrendTransformer(TransformerExponential):
@@ -177,7 +177,7 @@ class AddTrendTransformer(TransformerExponential):
         self.is_alpha = False if alpha is None else True
         self.alpha = alpha
 
-    def transform(self, point_dict, y):
+    def transform(self, point_dict, y_dict):
         self.check_kind(point_dict)
         if not self.is_alpha:
             # The limits were chosen so the change won't be too significant
@@ -187,7 +187,7 @@ class AddTrendTransformer(TransformerExponential):
             # makes the trend more exponential
             points = np.array(points) * (1 + trend)
             point_dict['data'][date] = list(points)
-        return point_dict, y
+        return point_dict, y_dict
 
 
 class AddWeekSeasonalityTransformer(TransformerExponential):
@@ -204,7 +204,7 @@ class AddWeekSeasonalityTransformer(TransformerExponential):
         self.is_alpha = False if alpha is None else True
         self.alpha = alpha
 
-    def transform(self, point_dict, y):
+    def transform(self, point_dict, y_dict):
         self.check_kind(point_dict)
         if not self.is_alpha:
             # The limits were chosen so the change won't be too significant
@@ -216,4 +216,4 @@ class AddWeekSeasonalityTransformer(TransformerExponential):
             week_season = (week[i % 7]) * self.alpha
             points = np.array(points) * (1 + week_season)
             point_dict['data'][date] = list(points)
-        return point_dict, y
+        return point_dict, y_dict
