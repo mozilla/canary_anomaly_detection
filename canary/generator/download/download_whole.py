@@ -20,7 +20,6 @@ if __name__ == '__main__':
                         help='Number of versions of nightly to download the data from',
                         default=5)
     args = parser.parse_args()
-    import ipdb; ipdb.set_trace()
     dates_versions_response = requests.get(
         'https://aggregates.telemetry.mozilla.org/'
         'aggregates_by/build_id/channels/nightly/dates/').text

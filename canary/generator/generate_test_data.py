@@ -7,7 +7,12 @@ import os
 import json
 from argparse import ArgumentParser
 
-from canary.generator.utils import buckets_to_points, points_to_buckets, plot, read_X_y_dicts_from_files
+from canary.generator.utils import (
+    buckets_to_points,
+    points_to_buckets,
+    plot,
+    read_X_y_dicts_from_files,
+)
 from canary.generator.pipelines_categorical import (
     anomaly_categorical_pipeline,
     not_anomaly_categorical_pipeline,
@@ -94,4 +99,3 @@ if __name__ == '__main__':
 
         if args.plots:
             plot(hists[column], y[column], new_hist, new_y, filename=directory_plot)
-

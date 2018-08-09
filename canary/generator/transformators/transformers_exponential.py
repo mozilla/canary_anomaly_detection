@@ -47,10 +47,8 @@ class AddMoveTransformer(TransformerExponential):
         points = point_dict['data'][self.change_date]
         points = abs(np.array(points) * (1 + self.shift))
         point_dict['data'][self.change_date] = list(points)
-        if y is not None:
-            y_copy[self.change_date] = 1
-            return point_dict, y_copy
-        return point_dict
+        y_copy[self.change_date] = 1
+        return point_dict, y_copy
 
 
 class AddToSomeBucketSmoothTransformer(TransformerExponential):
@@ -88,6 +86,7 @@ class AddToSomeBucketSmoothTransformer(TransformerExponential):
         if not self.is_std:
             self.std = np.random.uniform(low=0, high=1) * self.mean
         if not self.is_ratio:
+            # The limits were chosen to best imitate actual anomalies
             self.ratio = np.random.uniform(0.1, 0.4)
 
         shape = (self.mean / self.std) ** 2
@@ -95,16 +94,14 @@ class AddToSomeBucketSmoothTransformer(TransformerExponential):
         points = [np.random.gamma(shape, scale) if
                   np.random.binomial(1, self.ratio) else p for p in points]
         point_dict['data'][self.change_date] = list(points)
-        if y is not None:
-            y_copy[self.change_date] = 1
-            return point_dict, y_copy
-        return point_dict
+        y_copy[self.change_date] = 1
+        return point_dict, y_copy
 
 
 class AddAnotherDistTransformer(TransformerExponential):
     def __init__(self, mean=None, std=None, change_date=None):
         """
-        Changes data in specified day to gamma distribution with specified
+        Changes data for specified day to gamma distribution with specified
         mean and std. If the values are not provided, changes the data to be from gamma
         distribution of random mean and std.
 
@@ -130,16 +127,15 @@ class AddAnotherDistTransformer(TransformerExponential):
         if not self.is_mean:
             self.mean = np.random.uniform(low=0, high=1) * max(point_dict['buckets'])
         if not self.is_std:
+            # The limits were chosen to best imitate actual anomalies
             self.std = np.random.uniform(low=0.3, high=1) * self.mean
         shape = (self.mean / self.std) ** 2
         scale = self.mean / shape
         points = point_dict['data'][self.change_date]
         points = np.random.gamma(shape, scale, len(points))
         point_dict['data'][self.change_date] = list(points)
-        if y is not None:
-            y_copy[self.change_date] = 1
-            return point_dict, y_copy
-        return point_dict
+        y_copy[self.change_date] = 1
+        return point_dict, y_copy
 
 
 class AddExpNoiseTransformer(TransformerExponential):
@@ -159,14 +155,13 @@ class AddExpNoiseTransformer(TransformerExponential):
     def transform(self, point_dict, y):
         self.check_kind(point_dict)
         if not self.is_ratio:
+            # The limits were chosen so the change won't be too significant
             self.ratio = np.random.uniform(0, 0.2)
         for date, points in point_dict['data'].items():
             points = [np.random.exponential(abs(p)) if
                       np.random.binomial(1, self.ratio) else p for p in points]
             point_dict['data'][date] = list(points)
-        if y is not None:
-            return point_dict, y
-        return point_dict
+        return point_dict, y
 
 
 class AddTrendTransformer(TransformerExponential):
@@ -185,15 +180,14 @@ class AddTrendTransformer(TransformerExponential):
     def transform(self, point_dict, y):
         self.check_kind(point_dict)
         if not self.is_alpha:
+            # The limits were chosen so the change won't be too significant
             self.alpha = np.random.uniform(-0.001, 0.001)
         for i, (date, points) in enumerate(sorted(point_dict['data'].items())):
             trend = i * self.alpha
             # makes the trend more exponential
             points = np.array(points) * (1 + trend)
             point_dict['data'][date] = list(points)
-        if y is not None:
-            return point_dict, y
-        return point_dict
+        return point_dict, y
 
 
 class AddWeekSeasonalityTransformer(TransformerExponential):
@@ -213,6 +207,7 @@ class AddWeekSeasonalityTransformer(TransformerExponential):
     def transform(self, point_dict, y):
         self.check_kind(point_dict)
         if not self.is_alpha:
+            # The limits were chosen so the change won't be too significant
             self.alpha = np.random.uniform(0, 0.1)
         week = []
         for i in range(7):
@@ -221,6 +216,4 @@ class AddWeekSeasonalityTransformer(TransformerExponential):
             week_season = (week[i % 7]) * self.alpha
             points = np.array(points) * (1 + week_season)
             point_dict['data'][date] = list(points)
-        if y is not None:
-            return point_dict, y
-        return point_dict
+        return point_dict, y

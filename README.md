@@ -7,6 +7,10 @@ You should just install the requirements:
 pip install -e .
 ```
 
+## Testing
+
+You can run tests by typing `pytest` in the `canary` directory.
+
 ## Generator
 The generator module is use to generate the test data, i.e. data with synthetic anomalies. 
 The Data flow:

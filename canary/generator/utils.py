@@ -107,8 +107,9 @@ def buckets_to_points(bucket_dict, n_points=10000):
                     high = low + (buckets[i] - buckets[i - 1])
                 else:
                     high = buckets[i + 1]
-                points += truncexpon.rvs(
-                    high, size=max(int(round(dens*n_points, 0)), 0), loc=low).tolist()
+                points += truncexpon.rvs(high,
+                                         size=max(int(round(dens*n_points, 0)), 0),
+                                         loc=low).tolist()
             points_dict['data'][date] = list(points)
     else:
         for date, hist in bucket_dict['data'].items():
@@ -229,12 +230,8 @@ def read_X_y_dicts_from_files(list_of_files):
      dict of (date: boolean (if the day is anomalous)) pairs is the value, eg:
      {
          'METRIC': {
-             'buckets': [1, 2, 4, 8],
-             'kind': 'exponential'
-             'data': {
-                 '20180713': 0,
-                 '20180714': 1,
-             }
+             '20180713': 0,
+             '20180714': 1,
          }
      }
     """

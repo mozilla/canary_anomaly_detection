@@ -15,7 +15,7 @@ class DataTransformPipeline:
         self.transformers = transformers
         self.kinds = kinds
 
-    def transform(self, X, y=None):
+    def transform(self, X, y):
         for trans in self.transformers:
             if X['kind'] in self.kinds:
                 X, y = trans.transform(X, y=y)

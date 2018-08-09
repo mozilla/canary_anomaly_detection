@@ -41,16 +41,15 @@ class AddMoveTransformer(TransformerLinear):
         if not self.is_date:
             self.change_date = np.random.choice(list(point_dict['data'].keys()))
         if not self.is_shift:
+            # The limits were chosen to best imitate actual anomalies
             self.shift = np.random.uniform(-0.8, 0.8) * max(point_dict['buckets'])
 
         y_copy = deepcopy(y)
         points = point_dict['data'][self.change_date]
         points = abs(np.array(points) + self.shift)
         point_dict['data'][self.change_date] = list(points)
-        if y is not None:
-            y_copy[self.change_date] = 1
-            return point_dict, y_copy
-        return point_dict
+        y_copy[self.change_date] = 1
+        return point_dict, y_copy
 
 
 class AddToSomeBucketSmoothTransformer(TransformerLinear):
@@ -88,6 +87,7 @@ class AddToSomeBucketSmoothTransformer(TransformerLinear):
         if not self.is_std:
             self.std = np.random.uniform(low=0, high=1) * self.mean
         if not self.is_ratio:
+            # The limits were chosen to best imitate actual anomalies
             self.ratio = np.random.uniform(0.1, 0.4)
 
         shape = (self.mean / self.std) ** 2
@@ -95,10 +95,8 @@ class AddToSomeBucketSmoothTransformer(TransformerLinear):
         points = [np.random.gamma(shape, scale) if
                   np.random.binomial(1, self.ratio) else p for p in points]
         point_dict['data'][self.change_date] = list(points)
-        if y is not None:
-            y_copy[self.change_date] = 1
-            return point_dict, y_copy
-        return point_dict
+        y_copy[self.change_date] = 1
+        return point_dict, y_copy
 
 
 class AddAnotherDistTransformer(TransformerLinear):
@@ -130,16 +128,15 @@ class AddAnotherDistTransformer(TransformerLinear):
         if not self.is_mean:
             self.mean = np.random.uniform(low=0, high=1) * max(point_dict['buckets'])
         if not self.is_std:
+            # The limits were chosen to best imitate actual anomalies
             self.std = np.random.uniform(low=0.3, high=1) * self.mean
         shape = (self.mean / self.std) ** 2
         scale = self.mean / shape
         points = point_dict['data'][self.change_date]
         points = np.random.gamma(shape, scale, len(points))
         point_dict['data'][self.change_date] = list(points)
-        if y is not None:
-            y_copy[self.change_date] = 1
-            return point_dict, y_copy
-        return point_dict
+        y_copy[self.change_date] = 1
+        return point_dict, y_copy
 
 
 class AddGaussianNoiseTransformer(TransformerLinear):
@@ -159,14 +156,13 @@ class AddGaussianNoiseTransformer(TransformerLinear):
     def transform(self, point_dict, y):
         self.check_kind(point_dict)
         if not self.is_std:
+            # The limits were chosen so the change won't be too significant
             self.std = np.random.uniform(0, 0.01) * max(point_dict['buckets'])
         for date, points in point_dict['data'].items():
             noise = np.random.normal(0, self.std, len(points))
             points = np.array(points) + noise
             point_dict['data'][date] = list(points)
-        if y is not None:
-            return point_dict, y
-        return point_dict
+        return point_dict, y
 
 
 class AddTrendTransformer(TransformerLinear):
@@ -185,14 +181,13 @@ class AddTrendTransformer(TransformerLinear):
     def transform(self, point_dict, y):
         self.check_kind(point_dict)
         if not self.is_alpha:
+            # The limits were chosen so the change won't be too significant
             self.alpha = np.random.uniform(-0.001, 0.001) * max(point_dict['buckets'])
         for i, (date, points) in enumerate(sorted(point_dict['data'].items())):
             trend = i * self.alpha
             points = np.array(points) + trend
             point_dict['data'][date] = list(points)
-        if y is not None:
-            return point_dict, y
-        return point_dict
+        return point_dict, y
 
 
 class AddWeekSeasonalityTransformer(TransformerLinear):
@@ -212,6 +207,7 @@ class AddWeekSeasonalityTransformer(TransformerLinear):
     def transform(self, point_dict, y):
         self.check_kind(point_dict)
         if not self.is_alpha:
+            # The limits were chosen so the change won't be too significant
             self.alpha = np.random.uniform(0, 0.01)
         week = []
         for i in range(7):
@@ -220,6 +216,4 @@ class AddWeekSeasonalityTransformer(TransformerLinear):
             week_season = (week[i % 7]) * self.alpha
             points = np.array(points) + week_season
             point_dict['data'][date] = list(points)
-        if y is not None:
-            return point_dict, y
-        return point_dict
+        return point_dict, y

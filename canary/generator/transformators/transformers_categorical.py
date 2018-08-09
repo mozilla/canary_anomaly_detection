@@ -53,15 +53,14 @@ class AddToSomeBucketTransformer(TransformerCategorical):
             self.bucket_number = np.random.choice(
                 list(range(len(hist))))
         if not self.val_to_add:
+            # The limits were chosen to best imitate actual anomalies
             self.val_to_add = np.random.uniform(0.2, 0.6)
 
         hist[self.bucket_number] += self.val_to_add
         hist = hist / (sum(hist))
         bucket_dict_copy['data'][self.change_date] = list(hist)
-        if y is not None:
-            y_copy[self.change_date] = 1
-            return bucket_dict_copy, y_copy
-        return bucket_dict_copy
+        y_copy[self.change_date] = 1
+        return bucket_dict_copy, y_copy
 
 
 class AddAnotherDistTransformer(TransformerCategorical):
@@ -92,16 +91,15 @@ class AddAnotherDistTransformer(TransformerCategorical):
         if not self.is_mean:
             self.mean = np.random.uniform(low=0, high=1) * len(bucket_dict['buckets'])
         if not self.is_std:
+            # The limits were chosen to best imitate actual anomalies
             self.std = np.random.uniform(low=0.3, high=1) * self.mean
         shape = (self.mean / self.std) ** 2
         scale = self.mean / shape
         hist = bucket_dict['data'][self.change_date]
         hist = np.random.gamma(shape, scale, len(hist))
         bucket_dict['data'][self.change_date] = list(hist/sum(hist))
-        if y is not None:
-            y_copy[self.change_date] = 1
-            return bucket_dict, y_copy
-        return bucket_dict
+        y_copy[self.change_date] = 1
+        return bucket_dict, y_copy
 
 
 class AddNoiseTransformer(TransformerCategorical):
@@ -121,12 +119,11 @@ class AddNoiseTransformer(TransformerCategorical):
     def transform(self, bucket_dict, y):
         self.check_kind(bucket_dict)
         if not self.is_std:
+            # The limits were chosen to best imitate actual anomalies
             self.std = np.random.uniform(0, 0.001) * len(bucket_dict['buckets'])
         for date, hist in bucket_dict['data'].items():
             noise = np.random.normal(0, self.std, len(hist))
             hist += noise
             hist = abs(hist)/sum(abs(hist))
             bucket_dict['data'][date] = list(hist)
-        if y is not None:
-            return bucket_dict, y
-        return bucket_dict
+        return bucket_dict, y
