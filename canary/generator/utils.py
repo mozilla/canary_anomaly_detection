@@ -187,22 +187,26 @@ def plot(X_true, y_true, X_changed, y_changed, filename):
     """
     Plots the changes in data. Produces two plots: one of untouched data and one of data
     with anomalies. The anomalies are coloured with red.
-    :param X_true: Unchanged X_dict in bucket version
-    :param y_true: Unchanged y_dict
-    :param X_changed: X_dict with anomalies in bucket version
-    :param y_changed: y_dict with anomalies
+    :param X_true: One unchanged metric from X_dict in bucket version
+    :param y_true: One unchanged metric from y_dict
+    :param X_changed: One metric from X_dict with anomalies in bucket version
+    :param y_changed: One metric from y_dict with anomalies
     :param filename: Directory, where the plot should be saved
     """
+    # It's used to have the same colour range on both plots
+    vmax = np.max([np.max(x) for x in X_true['data'].values()] +
+                  [np.max(x) for x in X_changed['data'].values()])
+    vmin = 0
+
     plt.figure(1, figsize=(15, 15))
     plt.subplot(211)
     try:
         df = X_metric_to_df(X_true)
         y_df = y_metric_to_df(y_true)
     except ValueError:
-        #     return
-        pass
-    sns.heatmap(df, cmap="YlGnBu")
-    sns.heatmap(df, mask=1 - y_df[0], cmap='YlOrRd')
+        return
+    sns.heatmap(df, cmap="YlGnBu", vmax=vmax, vmin=vmin)
+    sns.heatmap(df, mask=1 - y_df[0], cmap='YlOrRd', vmax=vmax, vmin=vmin)
     plt.xlabel('Date')
     plt.ylabel('Bucket')
     plt.title('NOT CHANGED')
@@ -210,8 +214,8 @@ def plot(X_true, y_true, X_changed, y_changed, filename):
     plt.subplot(212)
     df = X_metric_to_df(X_changed)
     y_df = y_metric_to_df(y_changed)
-    sns.heatmap(df, cmap="YlGnBu")
-    sns.heatmap(df, mask=1 - y_df[0], cmap='YlOrRd')
+    sns.heatmap(df, cmap="YlGnBu", vmax=vmax, vmin=vmin)
+    sns.heatmap(df, mask=1 - y_df[0], cmap='YlOrRd', vmax=vmax, vmin=vmin)
     plt.xlabel('Date')
     plt.ylabel('Bucket')
     plt.title('CHANGED')
