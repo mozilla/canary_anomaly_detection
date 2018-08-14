@@ -193,31 +193,30 @@ def plot(X_true, y_true, X_changed, y_changed, filename):
     :param y_changed: y_dict with anomalies
     :param filename: Directory, where the plot should be saved
     """
-    a4_dims = (15, 6)
-    plt.subplots(figsize=a4_dims)
+    plt.figure(1, figsize=(15, 15))
+    plt.subplot(211)
     try:
         df = X_metric_to_df(X_true)
         y_df = y_metric_to_df(y_true)
     except ValueError:
-        return
+        #     return
+        pass
     sns.heatmap(df, cmap="YlGnBu")
-    sns.heatmap(df, mask=1-y_df[0], cmap='YlOrRd')
+    sns.heatmap(df, mask=1 - y_df[0], cmap='YlOrRd')
     plt.xlabel('Date')
     plt.ylabel('Bucket')
     plt.title('NOT CHANGED')
-    plt.savefig(filename + '_NOT_CHANGED.png')
-    plt.close()
 
-    a4_dims = (15, 6)
-    plt.subplots(figsize=a4_dims)
+    plt.subplot(212)
     df = X_metric_to_df(X_changed)
     y_df = y_metric_to_df(y_changed)
     sns.heatmap(df, cmap="YlGnBu")
-    sns.heatmap(df, mask=1-y_df[0], cmap='YlOrRd')
+    sns.heatmap(df, mask=1 - y_df[0], cmap='YlOrRd')
     plt.xlabel('Date')
     plt.ylabel('Bucket')
     plt.title('CHANGED')
-    plt.savefig(filename + '_CHANGED.png')
+    plt.subplots_adjust(hspace=0.5)
+    plt.savefig(filename + '_PLOT.png')
     plt.close()
 
 

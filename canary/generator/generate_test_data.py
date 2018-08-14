@@ -98,4 +98,6 @@ if __name__ == '__main__':
         json.dump(new_y_test, open(directory_data_y_test, 'w'))
 
         if args.plots:
+            new_hist['data'] = {**new_hist_train['data'], **new_hist_test['data']}
+            new_y = {**new_y_train, **new_y_test}
             plot(hists[column], y[column], new_hist, new_y, filename=directory_plot)
