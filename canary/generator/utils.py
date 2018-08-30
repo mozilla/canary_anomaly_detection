@@ -96,7 +96,7 @@ def buckets_to_points(bucket_dict, n_points=10000):
 
     Transforming to points is necessary for some transformations.
 
-    :param bucket_dict: one metric from X_dict in bucket version to be transformed
+    :param bucket_dict: One metric from X_dict in bucket version to be transformed
     :param n_points: Number of points to be generated. Greater number of points indicates
     more accurate point distribution and more time that is needed.
     :return: one metric from X_dict in the point version
@@ -110,35 +110,52 @@ def buckets_to_points(bucket_dict, n_points=10000):
         points_dict['buckets_str'] = buckets
         points_dict['buckets'] = list(range(len(buckets)))
         buckets = points_dict['buckets']
-    if bucket_dict['kind'] in ['exponential', 'count']:
-        for date, hist in bucket_dict['data'].items():
-            points = []
-            for i, dens in enumerate(hist):
-                low = buckets[i]
-                if i + 1 == len(buckets):
-                    high = low + (buckets[i] - buckets[i - 1])
-                else:
-                    high = buckets[i + 1]
-                points += truncexpon.rvs(high,
-                                         size=max(int(round(dens*n_points, 0)), 0),
-                                         loc=low).tolist()
-            points_dict['data'][date] = list(points)
-    else:
-        for date, hist in bucket_dict['data'].items():
-            points = []
-            if len(hist) != len(buckets):
-                buckets = list(range(len(hist)))
-                points_dict['buckets'] = buckets
-            for i, dens in enumerate(hist):
-                low = buckets[i]
-                if i + 1 == len(buckets):
-                    high = low + (buckets[i] - buckets[i - 1])
-                else:
-                    high = buckets[i + 1]
-                points += np.random.uniform(high=high, low=low,
-                                            size=int(round(dens*n_points, 0))).tolist()
-            points_dict['data'][date] = list(points)
+    for date, hist in bucket_dict['data'].items():
+        points = day_bucket_to_dict(hist, buckets, bucket_dict['kind'], n_points)
+        points_dict['data'][date] = list(points)
     return points_dict
+
+
+def day_bucket_to_dict(bucket_hist, buckets, kind, n_points=10000):
+    """
+    Transforms one day to points, see `buckets_to_points` docs
+    :param bucket_hist: One histogram i.e. one day of data from one metric
+    :param buckets: List of buckets for the histogram
+    :param kind: Kind of the histogram e.g. 'exponential'
+    :param n_points: Number of points to be generated. Greater number of points indicates
+    more accurate point distribution and more time that is needed.
+    :return: Point representation of one day of data
+    """
+    if kind == 'categorical':
+        buckets = list(range(len(buckets)))
+    if kind in ['exponential', 'count']:
+        points = []
+        for i, dens in enumerate(bucket_hist):
+            low = buckets[i]
+            if i + 1 == len(buckets):
+                high = low + (buckets[i] - buckets[i - 1])
+            else:
+                high = buckets[i + 1]
+            points += truncexpon.rvs(
+                high, size=max(int(round(dens*n_points, 0)), 0), loc=low
+            ).tolist()
+        points = list(points)
+    else:
+        points = []
+        if len(bucket_hist) != len(buckets):
+            buckets = list(range(len(bucket_hist)))
+        for i, dens in enumerate(bucket_hist):
+            low = buckets[i]
+            if i + 1 == len(buckets):
+                high = low + (buckets[i] - buckets[i - 1])
+            else:
+                high = buckets[i + 1]
+            points += np.random.uniform(
+                high=high, low=low,
+                size=max(int(round(dens*n_points, 0)), 0)
+            ).tolist()
+        points = list(points)
+    return points
 
 
 def _bucket_add(point, i, bucket_data, buckets):
