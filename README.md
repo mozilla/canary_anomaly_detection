@@ -36,5 +36,5 @@ The Data flow:
     of some transformers, that are in `transformers` directory. Each pipeline (and each transformer) operates
     only on some kinds of the histograms. Some of the transformers add anomalies and change `y` and some only 
     add noise or trend.
-    * The plots of changes are generated with usage of the `plot` function from `utils`.
+    * The plots of changes are generated with usage of the `save_plot` function from `utils`.
     * Everything is saved in the directory provided by the user. In our example `/some/directory`.

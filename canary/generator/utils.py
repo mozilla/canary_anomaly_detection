@@ -10,7 +10,6 @@ import pandas as pd
 from scipy.stats import truncexpon
 from matplotlib import pyplot as plt
 import seaborn as sns
-from keras.metrics import mean_squared_error
 
 
 def _read_one_file(filename):
@@ -201,7 +200,7 @@ def points_to_buckets(point_dict):
     return bucket_dict
 
 
-def plot(X_true, y_true, X_changed, y_changed, filename):
+def save_plot(X_true, y_true, X_changed, y_changed, filename):
     """
     Plots the changes in data. Produces two plots: one of untouched data and one of data
     with anomalies. The anomalies are coloured with red.
@@ -209,7 +208,7 @@ def plot(X_true, y_true, X_changed, y_changed, filename):
     :param y_true: One unchanged metric from y_dict
     :param X_changed: One metric from X_dict with anomalies in bucket version
     :param y_changed: One metric from y_dict with anomalies
-    :param filename: Directory, where the plot should be saved
+    :param filename: Directory, where the save_plot should be saved
     """
     # It's used to have the same colour range on both plots
     vmax = np.max([np.max(x) for x in X_true['data'].values()] +
@@ -283,49 +282,3 @@ def read_X_y_dicts_from_files(list_of_files):
         y_dict[metric] = dict.fromkeys(hist['data'], 0)
     return X_dict, y_dict
 
-
-def mse_times_100(y_true, y_pred):
-    """
-    Loss used for the model, `mean_squared_error` is a bit too small
-    :param y_true: Ground truth array
-    :param y_pred: Predicted array
-    :return: `mean_squared_error` loss times 100
-    """
-    return 100*mean_squared_error(y_true, y_pred)
-
-
-def bhattacharyya_dist(hist_1, hist_2):
-    """
-    Computes the bhattacharyya distance between two histograms
-    """
-    bc = np.sum(np.sqrt(np.abs(np.array(hist_1)) * np.abs(np.array(hist_2))))
-    dist = -np.log(bc + 1e-8)
-    return dist if not np.isnan(dist) else 0
-
-
-def max_diff_dist(hist_1, hist_2):
-    """
-    Computes absolute difference between histograms by each bucket and takes
-    maximum of the differences
-    """
-    diff = abs(np.array(hist_1) - np.array(hist_2))
-    return np.max(diff)
-
-
-def sum_of_diff_dist(hist_1, hist_2):
-    """
-    Computes absolute difference between histograms by each bucket and takes
-    sum of the differences
-    """
-    diff = abs(np.array(hist_1) - np.array(hist_2))
-    return np.sum(diff)
-
-
-def percentile(array, point):
-    """
-    Computes the value of empirical CDF for a given point, i.e. counts the values
-    smaller than given point and divides by length of an array
-    :param array: array of values from some distribution
-    :param point: value to compute empirical CDF for
-    """
-    return float(sum(i < point for i in sorted(array)))/float(len(array))

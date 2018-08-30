@@ -10,7 +10,7 @@ from argparse import ArgumentParser
 from canary.generator.utils import (
     buckets_to_points,
     points_to_buckets,
-    plot,
+    save_plot,
     read_X_y_dicts_from_files,
 )
 from canary.generator.pipelines_categorical import (
@@ -100,4 +100,4 @@ if __name__ == '__main__':
         if args.plots:
             new_hist['data'] = {**new_hist_train['data'], **new_hist_test['data']}
             new_y = {**new_y_train, **new_y_test}
-            plot(hists[column], y[column], new_hist, new_y, filename=directory_plot)
+            save_plot(hists[column], y[column], new_hist, new_y, filename=directory_plot)
