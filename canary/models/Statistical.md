@@ -3,11 +3,14 @@
 
 
 ```python
+%load_ext autoreload
+%autoreload 2
 from glob import glob
 from collections import defaultdict
 import json
 from copy import deepcopy
 import os
+import pickle
 
 import numpy as np
 import pandas as pd
@@ -78,13 +81,24 @@ for metric in metrics:
 
 ## Calculate the distances on train and test
 
-First, we convert the data from histograms to distanced between next days as the LSTM works on the distances
+First, we convert the data from histograms to distanced between next days.
+
+Calculated distances:
+ - logarithm of Bhattacharyya distance
+ - logarithm of Wasserstein distance
+ - logarithm of energy distance
+ - logarithm of maximum difference between corresponding buckets
+ - logarithm of sum of difference between corresponding buckets
+ 
+Logarithm is a form of normalization of the distances.
+The distances were chosen arbitrary, the more diversed distances, the better.
 
 
 ```python
 bucket_dists = [log_bhattacharyya_dist, log_max_diff_dist, log_sum_of_diff_dist]
 points_dists = [log_wasserstein_dist, log_energy_dist]
 dists_train = calculate_dists(X_train, bucket_dists, points_dists)
+pickle.dump(dict(dists_train), open(os.path.join(DATA_DIR, 'dists_train'), 'wb'))
 ```
 
 Let's see one example of conversion between histogram (bottom) and distances (top) on the train set. We can clearly see the potential anomaly on the distance plot.
@@ -143,7 +157,7 @@ for i, m in enumerate(X_test.keys()):
                     y_pred[m][d2] = 0
         
         # make data frames with anomalies
-        y_test_df = y_metric_to_df(y_test[m])
+        y_test_df = y_metric_to_df(y_anomalies[m])
         y_pred_proba_df = y_metric_to_df(y_pred_proba[m])
         y_pred_anom_df = pd.DataFrame(y_pred[m], index=[0]).transpose()
         if len(np.unique(np.array(y_test_df[0]))) > 1:
@@ -156,10 +170,12 @@ for i, m in enumerate(X_test.keys()):
     except KeyError:
         print('Bad metric: ', m)
 results[func.__name__] = auc_arr
+pickle.dump(y_pred, open(os.path.join(DATA_DIR, 'preds_anom_statistical'), 'wb'))
+pickle.dump(y_pred_proba, open(os.path.join(DATA_DIR, 'preds_proba_anom_statistical'), 'wb'))
 ```
 
     metric:  A11Y_CONSUMERS
-    auc:  0.9967105263157895
+    auc:  0.9967105263157894
 
 
 
@@ -183,7 +199,7 @@ results[func.__name__] = auc_arr
 
 
     metric:  FX_TAB_SWITCH_UPDATE_MS
-    auc:  0.8883101851851852
+    auc:  0.8883101851851851
 
 
 
@@ -195,7 +211,7 @@ results[func.__name__] = auc_arr
 
 
     metric:  MASTER_PASSWORD_ENABLED
-    auc:  0.993421052631579
+    auc:  0.962171052631579
 
 
 
@@ -218,8 +234,8 @@ results[func.__name__] = auc_arr
 ![png](output_16_14.png)
 
 
-    SHUTDOWN_PHASE_DURATION_TICKS
-    SIMPLE_MEASURES_ADDONMANAGER
+    Bad metric:  SHUTDOWN_PHASE_DURATION_TICKS
+    Bad metric:  SIMPLE_MEASURES_ADDONMANAGER
     metric:  SIMPLE_MEASURES_SESSIONRESTOREINIT
     auc:  0.9986486486486486
 
@@ -232,7 +248,7 @@ results[func.__name__] = auc_arr
 ![png](output_16_17.png)
 
 
-    SIMPLE_MEASURES
+    Bad metric:  SIMPLE_MEASURES
     metric:  UPDATE_PING_COUNT_EXTERNAL
     auc:  0.5
 
@@ -245,9 +261,9 @@ results[func.__name__] = auc_arr
 ![png](output_16_20.png)
 
 
-    USE_COUNTER2_DEPRECATED
+    Bad metric:  USE_COUNTER2_DEPRECATED
     metric:  USE_COUNTER2_IDBMUTABLEFILE_GETFILE_PAGE
-    auc:  0.9249999999999999
+    auc:  0.905952380952381
 
 
 
@@ -258,9 +274,9 @@ results[func.__name__] = auc_arr
 ![png](output_16_23.png)
 
 
-    USE_COUNTER2
+    Bad metric:  USE_COUNTER2
     metric:  WEB_NOTIFICATION_SHOWN
-    auc:  0.9504748982360923
+    auc:  0.9491180461329716
 
 
 
@@ -276,7 +292,7 @@ results[func.__name__] = auc_arr
 print([(k, np.mean(v)) for k, v in results.items()])
 ```
 
-    [('mean', 0.8431942187026191)]
+    [('mean', 0.8424719025378878)]
 
 
 The average ROC AUC for all metrics is 0.84.

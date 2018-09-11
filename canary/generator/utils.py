@@ -281,4 +281,3 @@ def read_X_y_dicts_from_files(list_of_files):
     for metric, hist in X_dict.items():
         y_dict[metric] = dict.fromkeys(hist['data'], 0)
     return X_dict, y_dict
-

@@ -72,7 +72,17 @@ for m, hist in X_test.items():
 
 ## Calculate the distances on train and test
 
-First, we convert the data from histograms to distanced between next days as the LSTM works on the distances
+First, we convert the data from histograms to distanced between next days as the LSTM works on the distances.
+
+Calculated distances:
+ - logarithm of Bhattacharyya distance
+ - logarithm of Wasserstein distance
+ - logarithm of energy distance
+ - logarithm of maximum difference between corresponding buckets
+ - logarithm of sum of difference between corresponding buckets
+ 
+Logarithm is a form of normalization of the distances.
+The distances were chosen arbitrary, the more diversed distances, the better.
 
 
 ```python

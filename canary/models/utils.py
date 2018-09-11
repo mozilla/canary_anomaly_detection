@@ -33,6 +33,7 @@ def plot_dists(X_dist, X_hist, y_hist=None, limits=(-0.5, 0.5), legend_names=Non
     has no column names.
     """
     plt.figure()
+    plt.title('Comparing changes in distances and anomalies')
     # important magic numbers
     width_1 = 1.6
     width_2 = 2
@@ -40,7 +41,6 @@ def plot_dists(X_dist, X_hist, y_hist=None, limits=(-0.5, 0.5), legend_names=Non
 
     if y_hist is not None:
         width_2 = 2.5
-    plt.title('Comparing changes in distances and anomalies')
     ax0 = plt.axes([0, height, width_1, height], label='0')
     plt.setp(ax0.get_xticklabels(), visible=False)
     plt.plot(X_dist)
