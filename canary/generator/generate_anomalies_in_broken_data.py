@@ -136,14 +136,14 @@ if __name__ == '__main__':
         open(os.path.join(args.save_dir, 'data_split_architecture'), 'wb')
     )
     pickle.dump(
-        defaultdict_to_dict(data_arch),
+        defaultdict_to_dict(data_arch_changed),
         open(os.path.join(args.save_dir, 'data_split_architecture_CHANGED'), 'wb')
     )
     pickle.dump(
-        defaultdict_to_dict(data_arch),
+        defaultdict_to_dict(data_oses),
         open(os.path.join(args.save_dir, 'data_split_os'), 'wb')
     )
     pickle.dump(
-        defaultdict_to_dict(data_arch),
+        defaultdict_to_dict(data_oses_changed),
         open(os.path.join(args.save_dir, 'data_split_os_CHANGED'), 'wb')
     )
