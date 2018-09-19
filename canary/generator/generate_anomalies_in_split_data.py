@@ -15,7 +15,7 @@ import numpy as np
 def aggregate(data, buckets, field):
     """
     Aggregates the data by the field
-    :param data: broken data for one metric
+    :param data: split data for one metric
     :param buckets: buckets for one metric
     :param field: field by which to aggregate
     :return: aggregated data
@@ -55,8 +55,8 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument(dest='data_dir',
                         help='Directory with previously generated data', nargs='*')
-    parser.add_argument('-b', '--broken_data_dir', dest='broken_data_dir',
-                        help='Directory with downloaded broken data', nargs='*')
+    parser.add_argument('-b', '--split_data_dir', dest='split_data_dir',
+                        help='Directory with downloaded split data', nargs='*')
     parser.add_argument('-s', '--save_dir', dest='save_dir',
                         help='Directory where the transformed data should be saved')
     args = parser.parse_args()
@@ -75,28 +75,28 @@ if __name__ == '__main__':
     whole_data = dict()
     for directory in [path for path in args.data_dir if path.endswith('_X_test.json')]:
         m = directory.split('data/')[-1].split('_X_test')[0]
-        broken_data = []
+        split_data = []
         try:
-            for broken_dir in [path for path in args.broken_data_dir
+            for split_dir in [path for path in args.split_data_dir
                                if path.endswith('/' + m + '.json')]:
-                broken_data += json.load(open(broken_dir))
+                split_data += json.load(open(split_dir))
             whole_data[m] = json.load(open(directory))
             test_dates = set(whole_data[m]['data'].keys())
 
             # filtering
-            broken_data = [data for data in broken_data if data is not None]
-            broken_data = [data for data in broken_data if
+            split_data = [data for data in split_data if data is not None]
+            split_data = [data for data in split_data if
                            data['application'] == 'Firefox']
-            for opts in broken_data:
+            for opts in split_data:
                 opts['data'] = {data['date']: np.array(data['histogram'])
                                 for data in opts['data'] if data['date'] in test_dates}
 
             # architectures
-            data_arch[m] = aggregate(broken_data, whole_data[m]['buckets'],
+            data_arch[m] = aggregate(split_data, whole_data[m]['buckets'],
                                      'architecture')
 
             # oses
-            data_oses[m] = aggregate(broken_data, whole_data[m]['buckets'], 'os')
+            data_oses[m] = aggregate(split_data, whole_data[m]['buckets'], 'os')
 
         except (KeyError, FileNotFoundError) as e:
             print(m)
