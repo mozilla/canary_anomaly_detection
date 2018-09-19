@@ -25,10 +25,7 @@ def aggregate(data, buckets, field):
     )
     for opts in data:
         for date, hist in opts['data'].items():
-            try:
-                agg_data[opts[field]]['data'][date] += hist
-            except:
-                import ipdb; ipdb.set_trace()
+            agg_data[opts[field]]['data'][date] += hist
     for arch, data in agg_data.items():
         agg_data[arch]['buckets'] = buckets
         agg_data[arch]['data'] = {date: hist/np.sum(hist)
@@ -55,20 +52,22 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument(dest='data_dir',
                         help='Directory with previously generated data', nargs='*')
-    parser.add_argument('-b', '--split_data_dir', dest='split_data_dir',
+    parser.add_argument('-s', '--split_data_dir', dest='split_data_dir',
                         help='Directory with downloaded split data', nargs='*')
-    parser.add_argument('-s', '--save_dir', dest='save_dir',
+    parser.add_argument('-o', '--output_dir', dest='output_dir',
                         help='Directory where the transformed data should be saved')
     args = parser.parse_args()
     X_test = dict()
     for file in [path for path in args.data_dir if path.endswith('_X_test.json')]:
         m = file.split('/')[-1].split('_X_test')[0]
-        X_test[m] = json.load(open(file))
+        with open(file) as f:
+            X_test[m] = json.load(f)
 
     y_true = dict()
     for file in [path for path in args.data_dir if path.endswith('_y_test.json')]:
         m = file.split('/')[-1].split('_y_test')[0]
-        y_true[m] = json.load(open(file))
+        with open(file) as f:
+            y_true[m] = json.load(f)
 
     data_arch = dict()
     data_oses = dict()
@@ -79,8 +78,10 @@ if __name__ == '__main__':
         try:
             for split_dir in [path for path in args.split_data_dir
                                if path.endswith('/' + m + '.json')]:
-                split_data += json.load(open(split_dir))
-            whole_data[m] = json.load(open(directory))
+                with open(split_dir) as file:
+                    split_data += json.load(file)
+            with open(directory) as file:
+                whole_data[m] = json.load(file)
             test_dates = set(whole_data[m]['data'].keys())
 
             # filtering
@@ -131,19 +132,11 @@ if __name__ == '__main__':
                             change * np.array(whole_hist) + \
                             (1 - change) * np.array(data_arch[m][cat]['data'][day])
 
-    pickle.dump(
-        defaultdict_to_dict(data_arch),
-        open(os.path.join(args.save_dir, 'data_split_architecture'), 'wb')
-    )
-    pickle.dump(
-        defaultdict_to_dict(data_arch_changed),
-        open(os.path.join(args.save_dir, 'data_split_architecture_CHANGED'), 'wb')
-    )
-    pickle.dump(
-        defaultdict_to_dict(data_oses),
-        open(os.path.join(args.save_dir, 'data_split_os'), 'wb')
-    )
-    pickle.dump(
-        defaultdict_to_dict(data_oses_changed),
-        open(os.path.join(args.save_dir, 'data_split_os_CHANGED'), 'wb')
-    )
+    with open(os.path.join(args.output_dir, 'data_split_architecture'), 'wb') as file:
+        pickle.dump(defaultdict_to_dict(data_arch), file)
+    with open(os.path.join(args.output_dir, 'data_split_architecture_CHANGED'), 'wb') as file:
+        pickle.dump(defaultdict_to_dict(data_arch_changed), file)
+    with open(os.path.join(args.output_dir, 'data_split_os'), 'wb') as file:
+        pickle.dump(defaultdict_to_dict(data_oses), file)
+    with open(os.path.join(args.output_dir, 'data_split_os_CHANGED'), 'wb') as file:
+        pickle.dump(defaultdict_to_dict(data_oses_changed), file)

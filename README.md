@@ -40,11 +40,20 @@ The Data flow:
     * Everything is saved in the directory provided by the user. In our example `/some/directory`.
 3. Download the data broken by every dimension with `download_split.py`, eg:
     ```bash
-    python canary/generator/download/download_split.py /some/directory
+    python canary/generator/download/download_split.py /some/directory --channel nightly --number_of_versions 5
     ```
+    The script makes catalogs in `/some/directory` (first argument) with the data from 5 
+    (`--number_of_versions` argument) latest versions of nightly (`--channel` argument). 
+    The data is downloaded from Telemetry [HTTP API](https://github.com/mozilla/python_mozaggregator#api)
 4. Generate the broken data with anomalies with `generate_anomalies_in_split_data.py`, eg:
     ```bash
-    python canary/generator/generate_anomalies_in_split_data.py /directory/with/data -b /directory/with/broken/data -s /save/directory
+    python canary/generator/generate_anomalies_in_split_data.py generated/data/*.json \
+    --split_data_dir example_data_split/*.json --output_dir /save/directory
     ```
+    The first argument is the directory with data generated with `generate_test_data.py`. 
+    The `--split_data_dir` argument is the directory with the data downloaded with `download_split.py`, 
+    here example data, which is in the repo is used.
+    The `--output_dir` argument indicates the directory, where the generated data is saved. 
+    
     The script saves four files with the data. Two aggregated by architecture: original and with anomalies and two
     aggregated by os: original and with anomalies.

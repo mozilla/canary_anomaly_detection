@@ -16,7 +16,7 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument(dest='dir',
                         help='Directory, where generated data should be saved')
-    parser.add_argument('-n', '--nightly_version_number', dest='n_versions',
+    parser.add_argument('-n', '--nightly_version_number', dest='n_versions', type=int,
                         help='Number of versions of nightly to download the data from',
                         default=5)
     args = parser.parse_args()
@@ -55,6 +55,8 @@ if __name__ == '__main__':
                 continue
 
             # Store data on disc
-            json.dump(data, open(
-                os.path.join(args.dir,
-                             'nightly_' + version + '_whole/', metric + '.json'), 'w'))
+            save_dir = os.path.join(
+                args.dir, 'nightly_' + version + '_whole/', metric + '.json',
+            )
+            with open(save_dir, 'w') as f:
+                json.dump(data, f)
