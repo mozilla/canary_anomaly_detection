@@ -38,13 +38,13 @@ The Data flow:
     add noise or trend.
     * The plots of changes are generated with usage of the `save_plot` function from `utils`.
     * Everything is saved in the directory provided by the user. In our example `/some/directory`.
-3. Download the data broken by every dimension with `download_broke.py`, eg:
+3. Download the data broken by every dimension with `download_split.py`, eg:
     ```bash
-    python canary/generator/download/download_broke.py /some/directory
+    python canary/generator/download/download_split.py /some/directory
     ```
-4. Generate the broken data with anomalies with `generate_anomalies_in_broken_data.py`, eg:
+4. Generate the broken data with anomalies with `generate_anomalies_in_split_data.py`, eg:
     ```bash
-    python canary/generator/generate_anomalies_in_broken_data.py /directory/with/data -b /directory/with/broken/data -s /save/directory
+    python canary/generator/generate_anomalies_in_split_data.py /directory/with/data -b /directory/with/broken/data -s /save/directory
     ```
     The script saves four files with the data. Two aggregated by architecture: original and with anomalies and two
     aggregated by os: original and with anomalies.
