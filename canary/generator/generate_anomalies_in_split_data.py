@@ -25,7 +25,18 @@ def aggregate(data, buckets, field):
     )
     for opts in data:
         for date, hist in opts['data'].items():
-            agg_data[opts[field]]['data'][date] += hist
+            try:
+                agg_data[opts[field]]['data'][date] += hist
+            except ValueError:
+                old = agg_data[opts[field]]['data'][date]
+                if len(old) < len(hist):
+                    agg_data[opts[field]]['data'][date] = np.concatenate(
+                        [old, np.zeros(len(hist) - len(old))]
+                    )
+                elif len(old) > len(hist):
+                    hist = np.concatenate([hist, np.zeros(len(old) - len(hist))])
+                agg_data[opts[field]]['data'][date] += hist
+
     for arch, data in agg_data.items():
         agg_data[arch]['buckets'] = buckets
         agg_data[arch]['data'] = {date: hist/np.sum(hist)
@@ -90,7 +101,7 @@ if __name__ == '__main__':
                            data['application'] == 'Firefox']
             for opts in split_data:
                 opts['data'] = {data['date']: np.array(data['histogram'])
-                                for data in opts['data'] if data['date'] in test_dates}
+                                for data in opts['data']}
 
             # architectures
             data_arch[m] = aggregate(split_data, whole_data[m]['buckets'],
