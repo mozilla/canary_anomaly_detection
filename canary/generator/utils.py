@@ -111,12 +111,12 @@ def buckets_to_points(bucket_dict, n_points=10000):
         points_dict['buckets'] = list(range(len(buckets)))
         buckets = points_dict['buckets']
     for date, hist in bucket_dict['data'].items():
-        points = day_bucket_to_dict(hist, buckets, bucket_dict['kind'], n_points)
+        points = day_bucket_to_points(hist, buckets, bucket_dict['kind'], n_points)
         points_dict['data'][date] = list(points)
     return points_dict
 
 
-def day_bucket_to_dict(bucket_hist, buckets, kind, n_points=10000):
+def day_bucket_to_points(bucket_hist, buckets, kind, n_points=10000):
     """
     Transforms one day to points, see `buckets_to_points` docs
     :param bucket_hist: One histogram i.e. one day of data from one metric
