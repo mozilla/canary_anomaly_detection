@@ -1,7 +1,7 @@
 # Canary Anomaly Detection
 
 This is a research prototype built as part of an internship project. 
-See the bug [1475933](https://bugzilla.mozilla.org/showdependencytree.cgi?id=1475933&hide_resolved=1) 
+See the bug [1475933](https://bugzilla.mozilla.org/showdependencytree.cgi?id=1475933) 
 for context.
 
 ## Installation

@@ -44,28 +44,34 @@ PREDICTIONS_DIR = '/home/aga/canary/data/'
 
 
 ```python
-# TODO: Zmienic na with open
-y_pred = pickle.load(open(os.path.join(PREDICTIONS_DIR, 'preds_anom_statistical'), 'rb'))
-
-data_arch = pickle.load(open(os.path.join(SPLIT_DATA_DIR, 'data_split_architecture'), 'rb'))
-data_arch_changed = pickle.load(open(os.path.join(SPLIT_DATA_DIR, 'data_split_architecture_CHANGED'), 'rb'))
-data_oses = pickle.load(open(os.path.join(SPLIT_DATA_DIR, 'data_split_os'), 'rb'))
-data_oses_changed = pickle.load(open(os.path.join(SPLIT_DATA_DIR, 'data_split_os_CHANGED'), 'rb'))
+with open(os.path.join(PREDICTIONS_DIR, 'preds_anom_statistical') as file:
+    y_pred = pickle.load(file, 'rb'))
+with open(os.path.join(SPLIT_DATA_DIR, 'data_split_architecture') as file:
+    data_arch = pickle.load(file, 'rb'))
+with open(os.path.join(SPLIT_DATA_DIR, 'data_split_architecture_CHANGED') as file:
+    data_arch_changed = pickle.load(file, 'rb'))
+with open(os.path.join(SPLIT_DATA_DIR, 'data_split_os') as file
+    data_oses = pickle.load(file, 'rb'))
+with open(os.path.join(SPLIT_DATA_DIR, 'data_split_os_CHANGED') as file:
+    data_oses_changed = pickle.load(file, 'rb'))
 
 X_train = dict()
 for file in sorted(glob(os.path.join(DATA_DIR, '*_X_train.json'))):
     m = file.split('/')[-1].split('_X_train')[0]
-    X_train[m] = json.load(open(file))
+    with open(file):
+        X_train[m] = json.load(f)
 
 X_test = dict()
 for file in sorted(glob(os.path.join(DATA_DIR, '*_X_test.json'))):
     m = file.split('/')[-1].split('_X_test')[0]
-    X_test[m] = json.load(open(file))
+    with open(file) as f:
+        X_test[m] = json.load(f)
 
 y_true = dict()
 for file in sorted(glob(os.path.join(DATA_DIR, '*_y_test.json'))):
     m = file.split('/')[-1].split('_y_test')[0]
-    y_true[m] = json.load(open(file))
+    with open(file):
+        y_true[m] = json.load(f)
 
 # constructing the shape of predictions
 y_pred_split = dict()
@@ -91,6 +97,7 @@ Get only example metrics that have many days with anomalies in the split data.
 
 
 ```python
+# arbitrary threshold
 THRESHOLD = 0.97
 i_dict = {}
 for m in y_true.keys():
